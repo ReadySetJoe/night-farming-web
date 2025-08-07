@@ -56,6 +56,13 @@ export const isTargetActionable = (
   world: TerrainType[][],
   inventory: Inventory
 ): boolean => {
+  const currentCell = world[targetY]?.[targetX];
+
+  // Special case: forge is always interactable regardless of tool
+  if (currentCell === "forge") {
+    return true;
+  }
+
   // Check if target is on farmable land
   const farmX = targetX - FARM_START_X;
   const farmY = targetY - FARM_START_Y;
@@ -63,8 +70,6 @@ export const isTargetActionable = (
     farmX >= 0 && farmX < FARM_SIZE && farmY >= 0 && farmY < FARM_SIZE;
 
   if (!isOnFarm) return false; // Can't farm outside the farm area
-
-  const currentCell = world[targetY]?.[targetX];
 
   switch (selectedTool) {
     case "hoe":
@@ -142,6 +147,21 @@ export const handleAction = (prevState: GameState): GameState => {
         npcId: interactableNPC.id,
         text: dialogue,
         isActive: true,
+      },
+    };
+  }
+
+  // Handle forge interaction for horror event
+  if (targetCell === "forge" && currentScene === "blacksmith") {
+    return {
+      ...prevState,
+      horrorEvent: {
+        id: "forge_nightmare_001",
+        type: "forge_nightmare",
+        isActive: true,
+        startTime: Date.now(),
+        duration: 8000, // 8 seconds of horror
+        intensity: 1,
       },
     };
   }
@@ -300,8 +320,8 @@ export const handleAction = (prevState: GameState): GameState => {
     };
   }
 
-  // Only allow farming in exterior scene
-  if (currentScene !== "exterior") {
+  // Allow forge interaction in blacksmith, but otherwise only farming in exterior
+  if (currentScene !== "exterior" && !(targetCell === "forge" && currentScene === "blacksmith")) {
     return prevState;
   }
 

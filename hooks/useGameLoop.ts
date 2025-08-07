@@ -3,6 +3,7 @@ import { GameState, KeyState } from "../lib/types";
 import { checkCollision, isSolid } from "../lib/collision";
 import { createWorld, createTownSquare } from "../lib/world";
 import { getNPCFacing } from "../lib/npcs";
+import { isHorrorEventActive } from "../lib/horror";
 import {
   WORLD_WIDTH,
   WORLD_HEIGHT,
@@ -322,5 +323,26 @@ export const useGameLoop = (
     }, 1000 / FPS);
 
     return () => clearInterval(npcMovementInterval);
+  }, [setGameState]);
+
+  // Horror event management
+  useEffect(() => {
+    const horrorInterval = setInterval(() => {
+      setGameState(prev => {
+        if (!prev.horrorEvent) return prev;
+
+        // Check if horror event should end
+        if (!isHorrorEventActive(prev.horrorEvent)) {
+          return {
+            ...prev,
+            horrorEvent: null,
+          };
+        }
+
+        return prev;
+      });
+    }, 100);
+
+    return () => clearInterval(horrorInterval);
   }, [setGameState]);
 };

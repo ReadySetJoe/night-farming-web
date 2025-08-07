@@ -61,6 +61,15 @@ export interface NPC {
   isPaused: boolean;
 }
 
+export interface HorrorEvent {
+  id: string;
+  type: "forge_nightmare";
+  isActive: boolean;
+  startTime: number;
+  duration: number;
+  intensity: number;
+}
+
 export interface GameState {
   player: Player;
   camera: Camera;
@@ -85,6 +94,7 @@ export interface GameState {
     text: string;
     isActive: boolean;
   } | null;
+  horrorEvent: HorrorEvent | null;
 }
 
 export interface KeyState {

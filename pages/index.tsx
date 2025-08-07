@@ -12,6 +12,7 @@ import { useInput } from "../hooks/useInput";
 import { useGameTime } from "../hooks/useGameTime";
 import { GameWorld } from "../components/GameWorld";
 import { GameUI } from "../components/GameUI";
+import { HorrorOverlay } from "../components/HorrorOverlay";
 import {
   CELL_SIZE,
   STARTING_COINS,
@@ -53,6 +54,7 @@ export default function NightFarming() {
     },
     npcs: [createMaryNPC()],
     activeDialogue: null,
+    horrorEvent: null,
   });
 
   const [keys, setKeys] = useState<KeyState>({
@@ -132,6 +134,8 @@ export default function NightFarming() {
         isActionable={isActionable}
         onToolSelect={handleToolSelect}
       />
+
+      <HorrorOverlay horrorEvent={gameState.horrorEvent} />
     </div>
   );
 }
