@@ -1,8 +1,31 @@
-import { GameState, Player, TargetPosition, Inventory, Crop, TerrainType, ToolType, SeedType } from "./types";
-import { WORLD_WIDTH, WORLD_HEIGHT, FARM_START_X, FARM_START_Y, FARM_SIZE, CELL_SIZE } from "./constants";
-import { createHouseInterior, createTownSquare, createWorld, createGeneralStoreInterior, createBlacksmithInterior, createCozyHouseInterior } from "./world";
+import {
+  GameState,
+  Player,
+  TargetPosition,
+  Inventory,
+  TerrainType,
+  ToolType,
+  SeedType,
+} from "./types";
+import {
+  WORLD_WIDTH,
+  WORLD_HEIGHT,
+  FARM_START_X,
+  FARM_START_Y,
+  FARM_SIZE,
+  CELL_SIZE,
+} from "./constants";
+import {
+  createHouseInterior,
+  createTownSquare,
+  createWorld,
+  createGeneralStoreInterior,
+  createBlacksmithInterior,
+  createCozyHouseInterior,
+} from "./world";
 import { getSeedConfig } from "./seeds";
 import { canInteractWithNPC, getNextDialogue, advanceDialogue } from "./npcs";
+import { getCropDisplay } from "./seeds";
 
 export const getTargetPosition = (player: Player): TargetPosition => {
   let targetX = player.x;
@@ -52,7 +75,7 @@ export const isTargetActionable = (
       return !!(
         currentCell &&
         typeof currentCell === "object" &&
-        currentCell.type === "tilled" && 
+        currentCell.type === "tilled" &&
         inventory.seeds[selectedTool as SeedType] > 0
       ); // Can plant on tilled soil if we have seeds
 
@@ -78,7 +101,15 @@ export const isTargetActionable = (
 };
 
 export const handleAction = (prevState: GameState): GameState => {
-  const { player, world, selectedTool, inventory, currentScene, npcs, activeDialogue } = prevState;
+  const {
+    player,
+    world,
+    selectedTool,
+    inventory,
+    currentScene,
+    npcs,
+    activeDialogue,
+  } = prevState;
   const targetPos = getTargetPosition(player);
   const { x: targetX, y: targetY } = targetPos;
   const targetCell = world[targetY]?.[targetX];
@@ -87,28 +118,31 @@ export const handleAction = (prevState: GameState): GameState => {
   if (activeDialogue && activeDialogue.isActive) {
     return {
       ...prevState,
-      activeDialogue: null
+      activeDialogue: null,
     };
   }
 
   // Check for NPC interactions
-  const interactableNPC = npcs.find(npc => 
-    npc.scene === currentScene && canInteractWithNPC(player.x, player.y, npc)
+  const interactableNPC = npcs.find(
+    npc =>
+      npc.scene === currentScene && canInteractWithNPC(player.x, player.y, npc)
   );
 
   if (interactableNPC) {
     const dialogue = getNextDialogue(interactableNPC);
     const updatedNPC = advanceDialogue(interactableNPC);
-    const updatedNPCs = npcs.map(npc => npc.id === interactableNPC.id ? updatedNPC : npc);
-    
+    const updatedNPCs = npcs.map(npc =>
+      npc.id === interactableNPC.id ? updatedNPC : npc
+    );
+
     return {
       ...prevState,
       npcs: updatedNPCs,
       activeDialogue: {
         npcId: interactableNPC.id,
         text: dialogue,
-        isActive: true
-      }
+        isActive: true,
+      },
     };
   }
 
@@ -160,7 +194,7 @@ export const handleAction = (prevState: GameState): GameState => {
     // Determine which building based on player position
     const playerX = player.x;
     const playerY = player.y;
-    
+
     // General store entrance (around x: 5, y: 9)
     if (playerX >= 2 && playerX <= 8 && playerY >= 5 && playerY <= 10) {
       const storeInterior = createGeneralStoreInterior();
@@ -181,7 +215,7 @@ export const handleAction = (prevState: GameState): GameState => {
         },
       };
     }
-    
+
     // Blacksmith entrance (around x: 15, y: 4)
     if (playerX >= 12 && playerX <= 18 && playerY >= 1 && playerY <= 5) {
       const blacksmithInterior = createBlacksmithInterior();
@@ -202,7 +236,7 @@ export const handleAction = (prevState: GameState): GameState => {
         },
       };
     }
-    
+
     // Cozy house entrance (around x: 24, y: 10)
     if (playerX >= 22 && playerX <= 27 && playerY >= 6 && playerY <= 11) {
       const cozyInterior = createCozyHouseInterior();
@@ -226,19 +260,28 @@ export const handleAction = (prevState: GameState): GameState => {
   }
 
   // Handle exiting building interiors
-  if (targetCell === "building_door" && (currentScene === "general_store" || currentScene === "blacksmith" || currentScene === "cozy_house")) {
+  if (
+    targetCell === "building_door" &&
+    (currentScene === "general_store" ||
+      currentScene === "blacksmith" ||
+      currentScene === "cozy_house")
+  ) {
     const townWorld = createTownSquare();
     // Position player outside the appropriate building
-    let exitX = 14, exitY = 12; // Default to center
-    
+    let exitX = 14,
+      exitY = 12; // Default to center
+
     if (currentScene === "general_store") {
-      exitX = 5; exitY = 10; // In front of general store
+      exitX = 5;
+      exitY = 10; // In front of general store
     } else if (currentScene === "blacksmith") {
-      exitX = 15; exitY = 5; // In front of blacksmith
+      exitX = 15;
+      exitY = 5; // In front of blacksmith
     } else if (currentScene === "cozy_house") {
-      exitX = 24; exitY = 11; // In front of cozy house
+      exitX = 24;
+      exitY = 11; // In front of cozy house
     }
-    
+
     return {
       ...prevState,
       currentScene: "town_square",
@@ -256,7 +299,6 @@ export const handleAction = (prevState: GameState): GameState => {
       },
     };
   }
-
 
   // Only allow farming in exterior scene
   if (currentScene !== "exterior") {
@@ -297,7 +339,7 @@ export const handleAction = (prevState: GameState): GameState => {
       if (
         currentCell &&
         typeof currentCell === "object" &&
-        currentCell.type === "tilled" && 
+        currentCell.type === "tilled" &&
         inventory.seeds[seedType] > 0
       ) {
         const seedConfig = getSeedConfig(seedType);
@@ -312,7 +354,7 @@ export const handleAction = (prevState: GameState): GameState => {
         };
         newInventory.seeds = {
           ...newInventory.seeds,
-          [seedType]: newInventory.seeds[seedType] - 1
+          [seedType]: newInventory.seeds[seedType] - 1,
         };
       }
       break;
@@ -325,10 +367,10 @@ export const handleAction = (prevState: GameState): GameState => {
         currentCell.wateringsReceived < currentCell.wateringsRequired
       ) {
         const newWaterings = currentCell.wateringsReceived + 1;
-        newWorld[targetY][targetX] = { 
-          ...currentCell, 
+        newWorld[targetY][targetX] = {
+          ...currentCell,
           watered: newWaterings >= currentCell.wateringsRequired,
-          wateringsReceived: newWaterings
+          wateringsReceived: newWaterings,
         };
       }
       break;
@@ -419,9 +461,8 @@ export const getCellDisplay = (cell: TerrainType): string => {
   }
   if (typeof cell === "object") {
     if (cell.type === "tilled") return "🟤";
-    
+
     // Use the new seed system for crop display
-    const { getCropDisplay } = require("./seeds");
     return getCropDisplay(cell);
   }
   return "❓";

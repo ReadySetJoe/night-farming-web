@@ -12,9 +12,9 @@ interface GameUIProps {
 }
 
 const formatTime = (hours: number, minutes: number): string => {
-  const period = hours >= 12 ? 'PM' : 'AM';
+  const period = hours >= 12 ? "PM" : "AM";
   const displayHours = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
-  const displayMinutes = minutes.toString().padStart(2, '0');
+  const displayMinutes = minutes.toString().padStart(2, "0");
   return `${displayHours}:${displayMinutes} ${period}`;
 };
 
@@ -33,7 +33,8 @@ export const GameUI: React.FC<GameUIProps> = ({
         <div className="bg-gray-800/90 px-6 py-5 rounded-xl backdrop-blur-sm border border-gray-600">
           <div className="text-white text-center space-y-3">
             <div className="text-3xl font-bold">
-              🕐 {formatTime(gameState.gameTime.hours, gameState.gameTime.minutes)}
+              🕐{" "}
+              {formatTime(gameState.gameTime.hours, gameState.gameTime.minutes)}
             </div>
             <div className="text-xl font-semibold">
               🪙 {gameState.inventory.coins}
@@ -53,10 +54,10 @@ export const GameUI: React.FC<GameUIProps> = ({
           <div className="flex items-center gap-6">
             {/* All Tools (including seeds) */}
             <div className="flex gap-4">
-              {toolbar.map((item) => {
+              {toolbar.map(item => {
                 const isSelected = gameState.selectedTool === item.id;
                 const isDisabled = item.disabled || false;
-                
+
                 return (
                   <div
                     key={item.id}
@@ -64,21 +65,23 @@ export const GameUI: React.FC<GameUIProps> = ({
                       isDisabled
                         ? "bg-gray-800 border-gray-700 opacity-50 cursor-not-allowed"
                         : isSelected
-                        ? "bg-blue-600 border-blue-400 shadow-lg shadow-blue-400/40 scale-105"
-                        : "bg-gray-700 border-gray-600 hover:bg-gray-600 hover:border-gray-500 hover:scale-102"
+                          ? "bg-blue-600 border-blue-400 shadow-lg shadow-blue-400/40 scale-105"
+                          : "bg-gray-700 border-gray-600 hover:bg-gray-600 hover:border-gray-500 hover:scale-102"
                     }`}
-                    onClick={() => !isDisabled && onToolSelect(item.id as ToolType)}
-                    title={`${item.name}${item.count !== undefined ? ` (${item.count})` : ''} (${item.key})`}
+                    onClick={() =>
+                      !isDisabled && onToolSelect(item.id as ToolType)
+                    }
+                    title={`${item.name}${item.count !== undefined ? ` (${item.count})` : ""} (${item.key})`}
                   >
                     <div className="absolute inset-0 flex items-center justify-center text-3xl">
                       {item.icon}
                     </div>
-                    
+
                     {/* Key number */}
                     <div className="absolute -top-3 -right-3 w-7 h-7 bg-gray-600 text-white text-sm rounded-full flex items-center justify-center font-bold border-2 border-gray-400 shadow-lg">
                       {item.key}
                     </div>
-                    
+
                     {/* Count badge for seeds */}
                     {item.count !== undefined && (
                       <div className="absolute -bottom-2 -right-2 bg-blue-600 text-white text-xs px-2 py-0.5 rounded-full font-bold border border-blue-400">
@@ -98,7 +101,9 @@ export const GameUI: React.FC<GameUIProps> = ({
               {/* Crops */}
               <div className="w-16 h-16 bg-gray-700 border-2 border-gray-600 rounded-xl flex flex-col items-center justify-center">
                 <div className="text-2xl">🥕</div>
-                <div className="text-sm text-white font-bold bg-gray-800 px-2 py-0.5 rounded-full mt-1">{gameState.inventory.crops}</div>
+                <div className="text-sm text-white font-bold bg-gray-800 px-2 py-0.5 rounded-full mt-1">
+                  {gameState.inventory.crops}
+                </div>
               </div>
             </div>
           </div>
@@ -176,10 +181,18 @@ export const GameUI: React.FC<GameUIProps> = ({
               {/* NPC Name */}
               <div className="text-center mb-6">
                 <div className="text-4xl mb-2">
-                  {gameState.npcs.find(npc => npc.id === gameState.activeDialogue?.npcId)?.emoji}
+                  {
+                    gameState.npcs.find(
+                      npc => npc.id === gameState.activeDialogue?.npcId
+                    )?.emoji
+                  }
                 </div>
                 <h3 className="text-xl font-bold text-white">
-                  {gameState.npcs.find(npc => npc.id === gameState.activeDialogue?.npcId)?.name}
+                  {
+                    gameState.npcs.find(
+                      npc => npc.id === gameState.activeDialogue?.npcId
+                    )?.name
+                  }
                 </h3>
               </div>
 
@@ -192,7 +205,9 @@ export const GameUI: React.FC<GameUIProps> = ({
 
               {/* Continue Prompt */}
               <div className="text-center">
-                <div className="text-gray-300 text-sm mb-2">Press SPACE to continue</div>
+                <div className="text-gray-300 text-sm mb-2">
+                  Press SPACE to continue
+                </div>
                 <div className="text-yellow-400 text-2xl animate-pulse">⌨️</div>
               </div>
             </div>

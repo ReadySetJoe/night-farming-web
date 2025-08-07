@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { GameState, KeyState, ViewportSize, ToolType, SeedType } from "../lib/types";
+import { GameState, KeyState, ViewportSize, ToolType } from "../lib/types";
 import { createWorld } from "../lib/world";
 import { createMaryNPC } from "../lib/npcs";
 import {
@@ -13,8 +13,6 @@ import { useGameTime } from "../hooks/useGameTime";
 import { GameWorld } from "../components/GameWorld";
 import { GameUI } from "../components/GameUI";
 import {
-  FARM_START_X,
-  FARM_START_Y,
   CELL_SIZE,
   STARTING_COINS,
   STARTING_HOUR,
@@ -75,7 +73,6 @@ export default function NightFarming() {
   const handleToolSelect = useCallback((tool: ToolType) => {
     setGameState(prev => ({ ...prev, selectedTool: tool }));
   }, []);
-
 
   const handleGameAction = useCallback(() => {
     setGameState(prev => handleAction(prev));

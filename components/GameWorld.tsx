@@ -26,7 +26,12 @@ export const GameWorld: React.FC<GameWorldProps> = ({
   const halfViewportHeight = viewportHeight / 2;
 
   // Handle all interior scene rendering (house, store, blacksmith, cozy house)
-  if (gameState.currentScene === "interior" || gameState.currentScene === "general_store" || gameState.currentScene === "blacksmith" || gameState.currentScene === "cozy_house") {
+  if (
+    gameState.currentScene === "interior" ||
+    gameState.currentScene === "general_store" ||
+    gameState.currentScene === "blacksmith" ||
+    gameState.currentScene === "cozy_house"
+  ) {
     const worldWidth = gameState.world[0]?.length || 0;
     const worldHeight = gameState.world.length;
     const interiorPixelWidth = worldWidth * CELL_SIZE;
@@ -66,26 +71,26 @@ export const GameWorld: React.FC<GameWorldProps> = ({
                     cell === "house_floor" || cell === "building_floor"
                       ? "#8b7355"
                       : cell === "house_wall" || cell === "building_wall"
-                      ? "#4a4a4a"
-                      : cell === "shop_counter"
-                      ? "#d4af37"
-                      : cell === "shop_shelf"
-                      ? "#8b4513"
-                      : cell === "anvil"
-                      ? "#708090"
-                      : cell === "forge"
-                      ? "#b22222"
-                      : cell === "kitchen_counter"
-                      ? "#deb887"
-                      : cell === "bookshelf"
-                      ? "#654321"
-                      : cell === "display_case"
-                      ? "#e6e6fa"
-                      : cell === "workbench"
-                      ? "#d2691e"
-                      : cell === "stove"
-                      ? "#2f4f4f"
-                      : "#2d5016",
+                        ? "#4a4a4a"
+                        : cell === "shop_counter"
+                          ? "#d4af37"
+                          : cell === "shop_shelf"
+                            ? "#8b4513"
+                            : cell === "anvil"
+                              ? "#708090"
+                              : cell === "forge"
+                                ? "#b22222"
+                                : cell === "kitchen_counter"
+                                  ? "#deb887"
+                                  : cell === "bookshelf"
+                                    ? "#654321"
+                                    : cell === "display_case"
+                                      ? "#e6e6fa"
+                                      : cell === "workbench"
+                                        ? "#d2691e"
+                                        : cell === "stove"
+                                          ? "#2f4f4f"
+                                          : "#2d5016",
                   fontSize: "24px",
                 }}
               >
@@ -226,22 +231,22 @@ export const GameWorld: React.FC<GameWorldProps> = ({
                       ? "#8b4513"
                       : "#654321"
                     : cell === "grass"
-                    ? (worldX + worldY) % 2 === 0
-                      ? "#22c55e"
-                      : "#16a34a"
-                    : cell === "stone_path"
-                    ? "#9ca3af"
-                    : cell === "building_floor"
-                    ? "#8b7355"
-                    : cell === "building_wall"
-                    ? "#4a4a4a"
-                    : cell === "fence"
-                    ? "#8b4513"
-                    : cell === "stone_wall"
-                    ? "#6b7280"
-                    : cell === "path"
-                    ? "#a0845c"
-                    : "#2d5016",
+                      ? (worldX + worldY) % 2 === 0
+                        ? "#22c55e"
+                        : "#16a34a"
+                      : cell === "stone_path"
+                        ? "#9ca3af"
+                        : cell === "building_floor"
+                          ? "#8b7355"
+                          : cell === "building_wall"
+                            ? "#4a4a4a"
+                            : cell === "fence"
+                              ? "#8b4513"
+                              : cell === "stone_wall"
+                                ? "#6b7280"
+                                : cell === "path"
+                                  ? "#a0845c"
+                                  : "#2d5016",
                 fontSize: "24px",
               }}
             >
@@ -277,10 +282,10 @@ export const GameWorld: React.FC<GameWorldProps> = ({
               cell === "house_wall"
                 ? "rgba(255, 0, 0, 0.5)"
                 : cell === "water"
-                ? "rgba(0, 0, 255, 0.5)"
-                : cell === "tree"
-                ? "rgba(139, 69, 19, 0.5)"
-                : "rgba(255, 255, 255, 0.5)";
+                  ? "rgba(0, 0, 255, 0.5)"
+                  : cell === "tree"
+                    ? "rgba(139, 69, 19, 0.5)"
+                    : "rgba(255, 255, 255, 0.5)";
 
             return (
               <div
@@ -296,10 +301,10 @@ export const GameWorld: React.FC<GameWorldProps> = ({
                     cell === "house_wall"
                       ? "#ff0000"
                       : cell === "water"
-                      ? "#0000ff"
-                      : cell === "tree"
-                      ? "#8b4513"
-                      : "#ffffff",
+                        ? "#0000ff"
+                        : cell === "tree"
+                          ? "#8b4513"
+                          : "#ffffff",
                 }}
                 title={`Solid: ${cell}`}
               />

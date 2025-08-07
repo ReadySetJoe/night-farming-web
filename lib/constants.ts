@@ -2,7 +2,7 @@
 export const WORLD_WIDTH = 40;
 export const WORLD_HEIGHT = 30;
 
-// Farm area configuration  
+// Farm area configuration
 export const FARM_START_X = 10;
 export const FARM_START_Y = 10;
 export const FARM_SIZE = 12;
@@ -35,14 +35,49 @@ export const BASE_TOOLS = [
 
 // Input keys
 export const MOVEMENT_KEYS = [
-  "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", 
-  "w", "a", "s", "d", "W", "A", "S", "D"
+  "ArrowUp",
+  "ArrowDown",
+  "ArrowLeft",
+  "ArrowRight",
+  "w",
+  "a",
+  "s",
+  "d",
+  "W",
+  "A",
+  "S",
+  "D",
 ] as const;
 
 export const GAME_CONTROL_KEYS = [
   ...MOVEMENT_KEYS,
-  " ", "1", "2", "3", "4", "F3", "f3"
+  " ",
+  "1",
+  "2",
+  "3",
+  "4",
+  "F3",
+  "f3",
 ] as const;
 
 // Solid terrain types for collision detection
-export const SOLID_TERRAIN_TYPES = ["house_wall", "water", "tree", "house_door", "building_wall", "building_door", "fountain", "fence", "stone_wall", "shop_counter", "shop_shelf", "anvil", "forge", "kitchen_counter", "bookshelf", "display_case", "workbench", "stove"] as const;
+export const SOLID_TERRAIN_TYPES = [
+  "house_wall",
+  "water",
+  "tree",
+  "house_door",
+  "building_wall",
+  "building_door",
+  "fountain",
+  "fence",
+  "stone_wall",
+  "shop_counter",
+  "shop_shelf",
+  "anvil",
+  "forge",
+  "kitchen_counter",
+  "bookshelf",
+  "display_case",
+  "workbench",
+  "stove",
+] as const;

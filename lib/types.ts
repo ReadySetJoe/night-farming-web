@@ -50,7 +50,13 @@ export interface NPC {
   movementPath: { x: number; y: number; pauseTime?: number }[];
   currentPathIndex: number;
   moveSpeed: number;
-  scene: "exterior" | "interior" | "town_square" | "general_store" | "blacksmith" | "cozy_house";
+  scene:
+    | "exterior"
+    | "interior"
+    | "town_square"
+    | "general_store"
+    | "blacksmith"
+    | "cozy_house";
   pauseTimer: number;
   isPaused: boolean;
 }
@@ -61,7 +67,13 @@ export interface GameState {
   world: (Crop | null | string)[][];
   selectedTool: ToolType;
   inventory: Inventory;
-  currentScene: "exterior" | "interior" | "town_square" | "general_store" | "blacksmith" | "cozy_house";
+  currentScene:
+    | "exterior"
+    | "interior"
+    | "town_square"
+    | "general_store"
+    | "blacksmith"
+    | "cozy_house";
   gameTime: {
     hours: number;
     minutes: number;

@@ -2,18 +2,15 @@ import { useEffect } from "react";
 import { GameState, KeyState } from "../lib/types";
 import { checkCollision, isSolid } from "../lib/collision";
 import { createWorld, createTownSquare } from "../lib/world";
-import { getNextNPCPosition, getNPCFacing } from "../lib/npcs";
-import { 
-  WORLD_WIDTH, 
-  WORLD_HEIGHT, 
-  CELL_SIZE, 
-  MOVE_SPEED, 
+import { getNPCFacing } from "../lib/npcs";
+import {
+  WORLD_WIDTH,
+  WORLD_HEIGHT,
+  CELL_SIZE,
+  MOVE_SPEED,
   CAMERA_MOVE_SPEED,
   FPS,
   CROP_GROWTH_INTERVAL,
-  FARM_START_X,
-  FARM_SIZE,
-  FARM_START_Y
 } from "../lib/constants";
 
 export const useGameLoop = (
@@ -113,13 +110,16 @@ export const useGameLoop = (
 
         // Check for scene transitions after movement
         const currentTile = prev.world[newPlayer.y]?.[newPlayer.x];
-        
+
         // Handle walkthrough transitions
-        if (currentTile === "exit_to_town" && prev.currentScene === "exterior") {
+        if (
+          currentTile === "exit_to_town" &&
+          prev.currentScene === "exterior"
+        ) {
           const townSquareWorld = createTownSquare();
           const townEntranceX = 0; // Same as in world.ts - far left edge
           const townEntranceY = Math.floor(townSquareWorld.length / 2);
-          
+
           return {
             ...prev,
             currentScene: "town_square",
@@ -138,11 +138,14 @@ export const useGameLoop = (
           };
         }
 
-        if (currentTile === "exit_to_farm" && prev.currentScene === "town_square") {
+        if (
+          currentTile === "exit_to_farm" &&
+          prev.currentScene === "town_square"
+        ) {
           const exteriorWorld = createWorld();
           const farmEntranceX = WORLD_WIDTH - 1; // Same as in world.ts - right edge
           const farmEntranceY = Math.floor(WORLD_HEIGHT / 2);
-          
+
           return {
             ...prev,
             currentScene: "exterior",
@@ -182,8 +185,8 @@ export const useGameLoop = (
   useEffect(() => {
     const growthInterval = setInterval(() => {
       setGameState(prev => {
-        const newWorld = prev.world.map((row, y) =>
-          row.map((cell, x) => {
+        const newWorld = prev.world.map(row =>
+          row.map(cell => {
             if (
               cell &&
               typeof cell === "object" &&
@@ -192,14 +195,15 @@ export const useGameLoop = (
               cell.stage < cell.maxStage
             ) {
               const timeSincePlanted = Date.now() - cell.plantedAt;
-              const shouldGrow = timeSincePlanted > (cell.stage + 1) * CROP_GROWTH_INTERVAL;
+              const shouldGrow =
+                timeSincePlanted > (cell.stage + 1) * CROP_GROWTH_INTERVAL;
 
               if (shouldGrow) {
-                return { 
-                  ...cell, 
-                  stage: cell.stage + 1, 
+                return {
+                  ...cell,
+                  stage: cell.stage + 1,
                   watered: false,
-                  wateringsReceived: 0 // Reset waterings for next stage
+                  wateringsReceived: 0, // Reset waterings for next stage
                 };
               }
             }
@@ -230,20 +234,21 @@ export const useGameLoop = (
               return {
                 ...npc,
                 pauseTimer: npc.pauseTimer - 1,
-                isMoving: false
+                isMoving: false,
               };
             } else {
               // Pause finished, move to next target
-              const nextIndex = (npc.currentPathIndex + 1) % npc.movementPath.length;
+              const nextIndex =
+                (npc.currentPathIndex + 1) % npc.movementPath.length;
               const nextTarget = npc.movementPath[nextIndex];
-              
+
               return {
                 ...npc,
                 currentPathIndex: nextIndex,
                 facing: getNPCFacing(npc.x, npc.y, nextTarget.x, nextTarget.y),
                 isPaused: false,
                 pauseTimer: 0,
-                isMoving: true
+                isMoving: true,
               };
             }
           }
@@ -268,13 +273,14 @@ export const useGameLoop = (
                 pixelY: targetPixelY,
                 isPaused: true,
                 pauseTimer: currentTarget.pauseTime,
-                isMoving: false
+                isMoving: false,
               };
             } else {
               // No pause, move to next position immediately
-              const nextIndex = (npc.currentPathIndex + 1) % npc.movementPath.length;
+              const nextIndex =
+                (npc.currentPathIndex + 1) % npc.movementPath.length;
               const nextTarget = npc.movementPath[nextIndex];
-              
+
               return {
                 ...npc,
                 x: currentTarget.x,
@@ -282,8 +288,13 @@ export const useGameLoop = (
                 pixelX: targetPixelX,
                 pixelY: targetPixelY,
                 currentPathIndex: nextIndex,
-                facing: getNPCFacing(currentTarget.x, currentTarget.y, nextTarget.x, nextTarget.y),
-                isMoving: true
+                facing: getNPCFacing(
+                  currentTarget.x,
+                  currentTarget.y,
+                  nextTarget.x,
+                  nextTarget.y
+                ),
+                isMoving: true,
               };
             }
           } else {
@@ -291,7 +302,7 @@ export const useGameLoop = (
             const directionX = targetPixelX - npc.pixelX;
             const directionY = targetPixelY - npc.pixelY;
             const distance = Math.sqrt(directionX ** 2 + directionY ** 2);
-            
+
             const moveX = (directionX / distance) * npc.moveSpeed;
             const moveY = (directionY / distance) * npc.moveSpeed;
 
@@ -301,7 +312,7 @@ export const useGameLoop = (
               pixelY: npc.pixelY + moveY,
               x: Math.round((npc.pixelX + moveX) / CELL_SIZE),
               y: Math.round((npc.pixelY + moveY) / CELL_SIZE),
-              isMoving: true
+              isMoving: true,
             };
           }
         });

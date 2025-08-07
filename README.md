@@ -7,24 +7,28 @@ A browser-based farming simulation game inspired by Stardew Valley, built with N
 ## 🎮 Game Features
 
 ### Core Gameplay
+
 - **Smooth pixel-based movement** - No grid snapping, 60 FPS responsive controls
 - **Complete farming cycle** - Till soil, plant seeds, water crops, harvest for profit
 - **Target-ahead actions** - Tools affect the tile you're facing, not standing on
 - **Real-time crop growth** - Watch your parsnips grow automatically when watered
 - **Economic system** - Earn coins from harvested crops to buy more seeds
 
-### World & Exploration  
+### World & Exploration
+
 - **30x20 game world** with house, pond, trees, and farmable areas
 - **Dynamic camera system** - Smoothly follows player with intelligent boundaries
 - **Collision detection** - Can't walk through walls, water, or trees
 - **Full-screen gameplay** - Adapts to any browser window size
 
 ### Tools & Inventory
+
 - **4 farming tools**: Hoe, Seeds, Watering Can, Harvest Hand
 - **Inventory management** - Track seeds, crops, and coins
 - **Quick tool switching** - Use number keys 1-4 for instant tool selection
 
 ### Debug & Development
+
 - **F3 debug mode** - Visual collision boundaries and real-time player data
 - **Color-coded terrain** - Red walls, blue water, brown trees for easy identification
 - **Performance optimized** - Efficient rendering and collision detection
@@ -32,10 +36,12 @@ A browser-based farming simulation game inspired by Stardew Valley, built with N
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js 18+ 
+
+- Node.js 18+
 - npm, yarn, pnpm, or bun
 
 ### Installation & Running
+
 ```bash
 # Clone the repository
 git clone <repository-url>
@@ -51,6 +57,7 @@ npm run dev
 Open [http://localhost:3000](http://localhost:3000) to play the game.
 
 ### Build for Production
+
 ```bash
 npm run build
 npm run start
@@ -59,12 +66,14 @@ npm run start
 ## 🎮 How to Play
 
 ### Controls
+
 - **WASD** or **Arrow Keys** - Move your farmer around the world
 - **Spacebar** - Use your selected tool on the tile in front of you
 - **1-4** - Select tools (Hoe, Seeds, Watering Can, Harvest Hand)
 - **F3** - Toggle debug mode to see collision boundaries
 
 ### Farming Process
+
 1. **Till the soil** - Use the Hoe (1) on brown farmable dirt
 2. **Plant seeds** - Use Seeds (2) on tilled soil
 3. **Water crops** - Use Watering Can (3) on planted seeds
@@ -72,6 +81,7 @@ npm run start
 5. **Harvest** - Use Harvest Hand (4) on fully grown crops for 50 coins each
 
 ### World Layout
+
 - **Brown soil area** - The only place you can farm (center of map)
 - **House** - Explore the structure in the top-left (walls block movement)
 - **Pond** - Water feature on the right side (can't walk on water)
@@ -81,19 +91,22 @@ npm run start
 ## 🛠️ Technical Details
 
 ### Built With
+
 - **Next.js 15.4.6** - React framework with SSR support
 - **React 19.1.0** - UI library with hooks-based state management
 - **TypeScript 5** - Type safety and better development experience
 - **Tailwind CSS 4** - Utility-first CSS framework for styling
 
 ### Architecture Highlights
+
 - **60 FPS game loop** using `setInterval` for smooth movement
-- **Pixel-perfect collision detection** with grid-based terrain checking  
+- **Pixel-perfect collision detection** with grid-based terrain checking
 - **Dynamic viewport rendering** - only renders visible tiles for performance
 - **SSR-compatible** - Proper handling of browser-only features like `window`
 - **Modular game systems** - Separate concerns for movement, camera, collision, farming
 
 ### Performance Features
+
 - **Viewport culling** - Only renders tiles visible on screen plus buffer
 - **Optimized collision checking** - Early bounds checking and efficient grid lookups
 - **Smooth camera interpolation** - Reduces jarring movements during gameplay
@@ -102,6 +115,7 @@ npm run start
 ## 🗺️ Development Roadmap
 
 ### Immediate Features
+
 - [ ] Multiple crop types with different growth rates
 - [ ] Tool durability and upgrade system
 - [ ] Day/night cycle with visual changes
@@ -109,13 +123,16 @@ npm run start
 - [ ] Sound effects and background music
 
 ### Future Horror Elements
+
 The game is designed to gradually introduce horror elements:
+
 - [ ] Mysterious crop failures during certain nights
-- [ ] Strange sounds and visual anomalies  
+- [ ] Strange sounds and visual anomalies
 - [ ] Unexplained changes to farm layout
 - [ ] Supernatural encounters that escalate over time
 
 ### Long-term Goals
+
 - [ ] NPC characters and dialogue system
 - [ ] Multiple farm areas to unlock and explore
 - [ ] Seasonal weather and environmental effects
@@ -131,8 +148,9 @@ The game is designed to gradually introduce horror elements:
 ## 🤝 Contributing
 
 This is currently a prototype project. Contributions, ideas, and feedback are welcome! Please feel free to:
+
 - Report bugs or gameplay issues
-- Suggest new features or improvements  
+- Suggest new features or improvements
 - Submit pull requests with enhancements
 - Share ideas for horror elements to add later
 

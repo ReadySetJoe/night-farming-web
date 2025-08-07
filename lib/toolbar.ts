@@ -13,7 +13,7 @@ export interface ToolbarItem {
 
 export const generateToolbar = (gameState: GameState): ToolbarItem[] => {
   const toolbar: ToolbarItem[] = [];
-  
+
   // Add base tools
   BASE_TOOLS.forEach((tool, index) => {
     toolbar.push({
@@ -21,19 +21,21 @@ export const generateToolbar = (gameState: GameState): ToolbarItem[] => {
       key: (index + 1).toString(),
     });
   });
-  
+
   // Add seed tools based on inventory
-  Object.entries(gameState.inventory.seeds).forEach(([seedType, count], index) => {
-    const config = SEED_CONFIGS[seedType as SeedType];
-    toolbar.push({
-      id: seedType,
-      icon: config.emoji,
-      name: `${config.name} Seeds`,
-      key: (BASE_TOOLS.length + index + 1).toString(),
-      count: count,
-      disabled: count === 0,
-    });
-  });
-  
+  Object.entries(gameState.inventory.seeds).forEach(
+    ([seedType, count], index) => {
+      const config = SEED_CONFIGS[seedType as SeedType];
+      toolbar.push({
+        id: seedType,
+        icon: config.emoji,
+        name: `${config.name} Seeds`,
+        key: (BASE_TOOLS.length + index + 1).toString(),
+        count: count,
+        disabled: count === 0,
+      });
+    }
+  );
+
   return toolbar;
 };
