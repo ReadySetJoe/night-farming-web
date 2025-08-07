@@ -50,11 +50,19 @@ export const useInput = (
           break;
         default:
           // Dynamic tool selection based on current toolbar
-          const keyNum = parseInt(key);
-          if (keyNum >= 1 && keyNum <= toolbar.length) {
-            const toolItem = toolbar[keyNum - 1];
+          if (key === "0" && toolbar.length >= 10) {
+            // Handle key 0 for 10th slot
+            const toolItem = toolbar[9];
             if (!toolItem.disabled) {
               onToolSelect(toolItem.id as ToolType);
+            }
+          } else {
+            const keyNum = parseInt(key);
+            if (keyNum >= 1 && keyNum <= Math.min(9, toolbar.length)) {
+              const toolItem = toolbar[keyNum - 1];
+              if (!toolItem.disabled) {
+                onToolSelect(toolItem.id as ToolType);
+              }
             }
           }
           break;

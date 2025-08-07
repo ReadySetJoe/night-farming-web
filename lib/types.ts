@@ -30,8 +30,12 @@ export interface Inventory {
     parsnip: number;
     potato: number;
   };
-  crops: number;
+  crops: {
+    parsnip: number;
+    potato: number;
+  };
   coins: number;
+  wood: number;
   selectedSeed?: SeedType;
 }
 
@@ -87,6 +91,7 @@ export interface GameState {
     hours: number;
     minutes: number;
     totalMinutes: number;
+    day: number;
   };
   npcs: NPC[];
   activeDialogue: {
@@ -95,6 +100,11 @@ export interface GameState {
     isActive: boolean;
   } | null;
   horrorEvent: HorrorEvent | null;
+  droppedItems: DroppedItem[];
+  treeHealth: Map<string, TreeData>;
+  savePrompt: {
+    isActive: boolean;
+  } | null;
 }
 
 export interface KeyState {
@@ -115,7 +125,7 @@ export interface TargetPosition {
 }
 
 export type TerrainType = Crop | null | string;
-export type ToolType = "hoe" | "watering_can" | "hand" | SeedType;
+export type ToolType = "hoe" | "watering_can" | "hand" | "axe" | "wood" | "parsnip_crop" | "potato_crop" | SeedType | string;
 
 export interface SeedConfig {
   name: string;
@@ -124,4 +134,21 @@ export interface SeedConfig {
   wateringsRequired: number;
   sellPrice: number;
   growthEmojis: string[];
+}
+
+export type ItemType = "wood" | "parsnip" | "potato";
+
+export interface DroppedItem {
+  id: string;
+  type: ItemType;
+  x: number;
+  y: number;
+  velocityX: number;
+  velocityY: number;
+  createdAt: number;
+}
+
+export interface TreeData {
+  health: number;
+  maxHealth: number;
 }

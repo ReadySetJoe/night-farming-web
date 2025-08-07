@@ -25,12 +25,25 @@ export const STARTING_MINUTE = 0;
 export const STARTING_COINS = 100;
 export const STARTING_PARSNIP_SEEDS = 5;
 export const STARTING_POTATO_SEEDS = 3;
+export const STARTING_WOOD = 0;
+
+// Tree chopping
+export const TREE_MAX_HEALTH = 3;
+export const WOOD_DROP_COUNT = 3;
+
+// Item collection
+export const ITEM_PICKUP_RANGE = 1.5;
+export const ITEM_MAGNET_RANGE = 3;
+export const ITEM_MAGNET_SPEED = 0.15;
+export const ITEM_PICKUP_DELAY = 1500; // 1.5 seconds before wood can be picked up
+export const CROP_PICKUP_DELAY = 500; // 0.5 seconds before crops can be picked up
 
 // Base tool definitions (seeds will be added dynamically)
 export const BASE_TOOLS = [
   { id: "hoe", icon: "🔨", name: "Hoe", key: "1" },
   { id: "watering_can", icon: "💧", name: "Water", key: "2" },
   { id: "hand", icon: "✋", name: "Harvest", key: "3" },
+  { id: "axe", icon: "🪓", name: "Axe", key: "4" },
 ] as const;
 
 // Input keys
@@ -56,6 +69,12 @@ export const GAME_CONTROL_KEYS = [
   "2",
   "3",
   "4",
+  "5",
+  "6",
+  "7",
+  "8",
+  "9",
+  "0",
   "F3",
   "f3",
 ] as const;

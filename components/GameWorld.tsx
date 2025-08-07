@@ -325,6 +325,34 @@ export const GameWorld: React.FC<GameWorldProps> = ({
         />
       )}
 
+      {/* Dropped Items */}
+      {gameState.droppedItems.map(item => {
+        const itemAge = Date.now() - item.createdAt;
+        const pickupDelay = (item.type === "parsnip" || item.type === "potato") ? 500 : 1500; // CROP_PICKUP_DELAY : ITEM_PICKUP_DELAY
+        const canPickup = itemAge >= pickupDelay;
+        return (
+          <div
+            key={item.id}
+            className="absolute flex items-center justify-center z-18"
+            style={{
+              left: item.x * CELL_SIZE - cameraX + halfViewportWidth - CELL_SIZE / 2,
+              top: item.y * CELL_SIZE - cameraY + halfViewportHeight - CELL_SIZE / 2,
+              width: CELL_SIZE,
+              height: CELL_SIZE,
+              fontSize: "20px",
+              transform: `scale(0.8)`,
+              filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.3))",
+              opacity: canPickup ? 1 : 0.5,
+              transition: "opacity 0.3s",
+            }}
+          >
+            {item.type === "wood" ? "🪵" : 
+             item.type === "parsnip" ? "🥕" :
+             item.type === "potato" ? "🥔" : "❓"}
+          </div>
+        );
+      })}
+
       {/* NPCs */}
       {gameState.npcs
         .filter(npc => npc.scene === gameState.currentScene)

@@ -6,6 +6,8 @@ import {
   TerrainType,
   ToolType,
   SeedType,
+  DroppedItem,
+  TreeData,
 } from "./types";
 import {
   WORLD_WIDTH,
@@ -14,6 +16,13 @@ import {
   FARM_START_Y,
   FARM_SIZE,
   CELL_SIZE,
+  TREE_MAX_HEALTH,
+  WOOD_DROP_COUNT,
+  ITEM_PICKUP_RANGE,
+  ITEM_MAGNET_RANGE,
+  ITEM_MAGNET_SPEED,
+  ITEM_PICKUP_DELAY,
+  CROP_PICKUP_DELAY,
 } from "./constants";
 import {
   createHouseInterior,
@@ -61,6 +70,11 @@ export const isTargetActionable = (
   // Special case: forge is always interactable regardless of tool
   if (currentCell === "forge") {
     return true;
+  }
+
+  // Axe can be used on any tree, regardless of location
+  if (selectedTool === "axe") {
+    return currentCell === "tree";
   }
 
   // Check if target is on farmable land
@@ -119,6 +133,15 @@ export const handleAction = (prevState: GameState): GameState => {
   const { x: targetX, y: targetY } = targetPos;
   const targetCell = world[targetY]?.[targetX];
 
+  // Handle save prompt interactions
+  if (prevState.savePrompt && prevState.savePrompt.isActive) {
+    // For now, just dismiss the prompt - we'll handle actual saving in a separate function
+    return {
+      ...prevState,
+      savePrompt: null,
+    };
+  }
+
   // Handle dialogue dismissal
   if (activeDialogue && activeDialogue.isActive) {
     return {
@@ -169,6 +192,9 @@ export const handleAction = (prevState: GameState): GameState => {
   // Handle scene transitions
   if (targetCell === "house_door") {
     if (currentScene === "exterior") {
+      // Save current exterior world before entering house
+      localStorage.setItem("night_farming_exterior_backup", JSON.stringify(prevState.world));
+      
       // Enter house
       const interiorWorld = createHouseInterior();
       return {
@@ -188,8 +214,21 @@ export const handleAction = (prevState: GameState): GameState => {
         },
       };
     } else {
-      // Exit house
-      const exteriorWorld = createWorld();
+      // Exit house - check if we have a saved exterior world
+      const savedExterior = localStorage.getItem("night_farming_exterior_backup");
+      let exteriorWorld;
+      
+      if (savedExterior && savedExterior !== "undefined" && savedExterior !== "null") {
+        try {
+          exteriorWorld = JSON.parse(savedExterior);
+        } catch (error) {
+          console.warn("Failed to parse saved exterior world, creating new one");
+          exteriorWorld = createWorld();
+        }
+      } else {
+        exteriorWorld = createWorld();
+      }
+      
       return {
         ...prevState,
         currentScene: "exterior",
@@ -328,6 +367,43 @@ export const handleAction = (prevState: GameState): GameState => {
   const newWorld = world.map(row => [...row]);
   const newInventory = { ...inventory };
 
+  // Handle axe on trees (can happen anywhere in exterior)
+  if (selectedTool === "axe" && targetCell === "tree" && currentScene === "exterior") {
+    const treeKey = `${targetX},${targetY}`;
+    const currentTreeHealth = prevState.treeHealth.get(treeKey) || { health: TREE_MAX_HEALTH, maxHealth: TREE_MAX_HEALTH };
+    
+    const newTreeHealth = new Map(prevState.treeHealth);
+    const updatedHealth = currentTreeHealth.health - 1;
+    
+    if (updatedHealth <= 0) {
+      // Tree is chopped down, create wood drops
+      newWorld[targetY][targetX] = null;
+      newTreeHealth.delete(treeKey);
+      
+      // Create wood drops that spread out
+      const newDrops: DroppedItem[] = [...prevState.droppedItems];
+      for (let i = 0; i < WOOD_DROP_COUNT; i++) {
+        const angle = (Math.PI * 2 * i) / WOOD_DROP_COUNT;
+        const speed = 0.1 + Math.random() * 0.05;
+        newDrops.push({
+          id: `wood_${Date.now()}_${i}`,
+          type: "wood",
+          x: targetX + 0.5,
+          y: targetY + 0.5,
+          velocityX: Math.cos(angle) * speed,
+          velocityY: Math.sin(angle) * speed,
+          createdAt: Date.now(),
+        });
+      }
+      
+      return { ...prevState, world: newWorld, treeHealth: newTreeHealth, droppedItems: newDrops };
+    } else {
+      // Tree takes damage but remains
+      newTreeHealth.set(treeKey, { health: updatedHealth, maxHealth: TREE_MAX_HEALTH });
+      return { ...prevState, treeHealth: newTreeHealth };
+    }
+  }
+
   // Check if target is on farmable land
   const farmX = targetX - FARM_START_X;
   const farmY = targetY - FARM_START_Y;
@@ -402,10 +478,24 @@ export const handleAction = (prevState: GameState): GameState => {
         currentCell.type !== "tilled" &&
         currentCell.stage === currentCell.maxStage
       ) {
-        const seedConfig = getSeedConfig(currentCell.type as SeedType);
-        newInventory.crops++;
-        newInventory.coins += seedConfig.sellPrice;
+        const cropType = currentCell.type as SeedType;
+        
+        // Clear the tile
         newWorld[targetY][targetX] = null;
+        
+        // Create a dropped crop item with small upward velocity
+        const newDrops: DroppedItem[] = [...prevState.droppedItems];
+        newDrops.push({
+          id: `crop_${cropType}_${Date.now()}`,
+          type: cropType as "parsnip" | "potato",
+          x: targetX + 0.5,
+          y: targetY + 0.5,
+          velocityX: (Math.random() - 0.5) * 0.05, // Small random horizontal velocity
+          velocityY: -0.1 - Math.random() * 0.05, // Small upward velocity
+          createdAt: Date.now(),
+        });
+        
+        return { ...prevState, world: newWorld, inventory: newInventory, droppedItems: newDrops };
       }
       break;
   }
@@ -493,4 +583,70 @@ export const formatTerrainForDebug = (terrain: TerrainType): string => {
     return `crop(${terrain?.type}, stage:${terrain?.stage}, watered:${terrain?.wateringsReceived}/${terrain?.wateringsRequired})`;
   }
   return terrain || "null";
+};
+
+export const updateDroppedItems = (state: GameState): GameState => {
+  const { droppedItems, player, inventory } = state;
+  if (droppedItems.length === 0) return state;
+  
+  const playerCenterX = player.x + 0.5;
+  const playerCenterY = player.y + 0.5;
+  const currentTime = Date.now();
+  
+  let newInventory = { ...inventory };
+  const updatedItems: DroppedItem[] = [];
+  
+  for (const item of droppedItems) {
+    const dx = playerCenterX - item.x;
+    const dy = playerCenterY - item.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    const itemAge = currentTime - item.createdAt;
+    const pickupDelay = (item.type === "parsnip" || item.type === "potato") ? CROP_PICKUP_DELAY : ITEM_PICKUP_DELAY;
+    const canPickup = itemAge >= pickupDelay;
+    
+    // Check if close enough to collect AND pickup delay has passed
+    if (distance < ITEM_PICKUP_RANGE && canPickup) {
+      // Collect the item
+      if (item.type === "wood") {
+        newInventory.wood = (newInventory.wood || 0) + 1;
+      } else if (item.type === "parsnip" || item.type === "potato") {
+        newInventory.crops[item.type] = (newInventory.crops[item.type] || 0) + 1;
+      }
+      continue; // Don't add to updatedItems (item is collected)
+    }
+    
+    let newX = item.x;
+    let newY = item.y;
+    let newVelX = item.velocityX * 0.95; // Apply friction
+    let newVelY = item.velocityY * 0.95;
+    
+    // Apply magnetic attraction if within range AND pickup delay has passed
+    if (distance < ITEM_MAGNET_RANGE && distance > ITEM_PICKUP_RANGE && canPickup) {
+      const pullStrength = ITEM_MAGNET_SPEED * (1 - distance / ITEM_MAGNET_RANGE);
+      newVelX += (dx / distance) * pullStrength;
+      newVelY += (dy / distance) * pullStrength;
+    }
+    
+    // Update position
+    newX += newVelX;
+    newY += newVelY;
+    
+    // Stop moving if velocity is very small
+    if (Math.abs(newVelX) < 0.001) newVelX = 0;
+    if (Math.abs(newVelY) < 0.001) newVelY = 0;
+    
+    updatedItems.push({
+      ...item,
+      x: newX,
+      y: newY,
+      velocityX: newVelX,
+      velocityY: newVelY,
+    });
+  }
+  
+  return {
+    ...state,
+    droppedItems: updatedItems,
+    inventory: newInventory,
+  };
 };

@@ -4,6 +4,7 @@ import { checkCollision, isSolid } from "../lib/collision";
 import { createWorld, createTownSquare } from "../lib/world";
 import { getNPCFacing } from "../lib/npcs";
 import { isHorrorEventActive } from "../lib/horror";
+import { updateDroppedItems } from "../lib/gameLogic";
 import {
   WORLD_WIDTH,
   WORLD_HEIGHT,
@@ -174,7 +175,21 @@ export const useGameLoop = (
         newCamera.x += (targetCameraX - newCamera.x) * CAMERA_MOVE_SPEED;
         newCamera.y += (targetCameraY - newCamera.y) * CAMERA_MOVE_SPEED;
 
-        return { ...prev, player: newPlayer, camera: newCamera };
+        // Update dropped items physics and collection
+        let updatedState = updateDroppedItems({ ...prev, player: newPlayer, camera: newCamera });
+
+        // Check for bed interaction in house interior
+        if (updatedState.currentScene === "interior") {
+          const bedCell = updatedState.world[newPlayer.y]?.[newPlayer.x];
+          if (bedCell === "furniture_bed" && !updatedState.savePrompt) {
+            updatedState = {
+              ...updatedState,
+              savePrompt: { isActive: true },
+            };
+          }
+        }
+
+        return updatedState;
       });
     };
 

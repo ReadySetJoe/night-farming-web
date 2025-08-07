@@ -26,12 +26,16 @@ export const GameUI: React.FC<GameUIProps> = ({
   onToolSelect,
 }) => {
   const toolbar = generateToolbar(gameState);
+  const currentDay = gameState.gameTime?.day || 1;
   return (
     <>
       {/* Top right - Clock and Coins */}
       <div className="absolute top-4 right-4 z-30">
         <div className="bg-gray-800/90 px-6 py-5 rounded-xl backdrop-blur-sm border border-gray-600">
           <div className="text-white text-center space-y-3">
+            <div className="text-sm text-gray-400 font-semibold">
+              Day {currentDay}
+            </div>
             <div className="text-3xl font-bold">
               🕐{" "}
               {formatTime(gameState.gameTime.hours, gameState.gameTime.minutes)}
@@ -93,19 +97,6 @@ export const GameUI: React.FC<GameUIProps> = ({
               })}
             </div>
 
-            {/* Divider */}
-            <div className="w-px h-16 bg-gray-500"></div>
-
-            {/* Inventory display only */}
-            <div className="flex gap-4">
-              {/* Crops */}
-              <div className="w-16 h-16 bg-gray-700 border-2 border-gray-600 rounded-xl flex flex-col items-center justify-center">
-                <div className="text-2xl">🥕</div>
-                <div className="text-sm text-white font-bold bg-gray-800 px-2 py-0.5 rounded-full mt-1">
-                  {gameState.inventory.crops}
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>

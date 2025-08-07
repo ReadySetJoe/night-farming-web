@@ -3,7 +3,7 @@ import { SeedType, SeedConfig, Crop } from "./types";
 export const SEED_CONFIGS: Record<SeedType, SeedConfig> = {
   parsnip: {
     name: "Parsnip",
-    emoji: "🥕",
+    emoji: "🟠", // Orange circle for parsnip seeds (vs 🥕 for harvested)
     maxStage: 3,
     wateringsRequired: 1, // Needs 1 watering total
     sellPrice: 50,
@@ -11,7 +11,7 @@ export const SEED_CONFIGS: Record<SeedType, SeedConfig> = {
   },
   potato: {
     name: "Potato",
-    emoji: "🥔",
+    emoji: "🟤", // Brown circle for potato seeds (vs 🥔 for harvested)
     maxStage: 4,
     wateringsRequired: 3, // Needs 3 waterings total
     sellPrice: 80,

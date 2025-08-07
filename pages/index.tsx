@@ -13,6 +13,8 @@ import { useGameTime } from "../hooks/useGameTime";
 import { GameWorld } from "../components/GameWorld";
 import { GameUI } from "../components/GameUI";
 import { HorrorOverlay } from "../components/HorrorOverlay";
+import { SaveDialog } from "../components/SaveDialog";
+import { saveGame, loadGame, hasSaveGame, applySaveData } from "../lib/saveSystem";
 import {
   CELL_SIZE,
   STARTING_COINS,
@@ -20,9 +22,11 @@ import {
   STARTING_MINUTE,
   STARTING_PARSNIP_SEEDS,
   STARTING_POTATO_SEEDS,
+  STARTING_WOOD,
 } from "../lib/constants";
 
 export default function NightFarming() {
+  const [exteriorWorldBackup, setExteriorWorldBackup] = useState<any>(null);
   const [gameState, setGameState] = useState<GameState>({
     player: {
       x: 4,
@@ -43,18 +47,26 @@ export default function NightFarming() {
         parsnip: STARTING_PARSNIP_SEEDS,
         potato: STARTING_POTATO_SEEDS,
       },
-      crops: 0,
+      crops: {
+        parsnip: 0,
+        potato: 0,
+      },
       coins: STARTING_COINS,
+      wood: STARTING_WOOD,
     },
     currentScene: "exterior",
     gameTime: {
       hours: STARTING_HOUR,
       minutes: STARTING_MINUTE,
       totalMinutes: STARTING_HOUR * 60 + STARTING_MINUTE,
+      day: 1,
     },
     npcs: [createMaryNPC()],
     activeDialogue: null,
     horrorEvent: null,
+    droppedItems: [],
+    treeHealth: new Map(),
+    savePrompt: null,
   });
 
   const [keys, setKeys] = useState<KeyState>({
@@ -80,6 +92,61 @@ export default function NightFarming() {
     setGameState(prev => handleAction(prev));
   }, []);
 
+  const handleSave = useCallback(() => {
+    // Save the current state (saveGame increments the day internally)
+    saveGame(gameState);
+    
+    // Reset time, increment day, and move player away from bed
+    setGameState(prev => {
+      const prevDay = prev.gameTime?.day || 1;
+      const newDay = prevDay + 1;
+      
+      // Move player down one tile from bed to avoid retriggering save
+      const newPlayerY = prev.player.y + 1;
+      
+      return {
+        ...prev,
+        gameTime: {
+          hours: STARTING_HOUR,
+          minutes: STARTING_MINUTE,
+          totalMinutes: STARTING_HOUR * 60 + STARTING_MINUTE,
+          day: newDay,
+        },
+        player: {
+          ...prev.player,
+          y: newPlayerY,
+          pixelY: newPlayerY * CELL_SIZE,
+        },
+        camera: {
+          ...prev.camera,
+          y: newPlayerY * CELL_SIZE,
+        },
+        savePrompt: null,
+      };
+    });
+  }, [gameState]);
+
+  const handleCancelSave = useCallback(() => {
+    setGameState(prev => {
+      // Move player down one tile from bed to avoid retriggering save
+      const newPlayerY = prev.player.y + 1;
+      
+      return {
+        ...prev,
+        player: {
+          ...prev.player,
+          y: newPlayerY,
+          pixelY: newPlayerY * CELL_SIZE,
+        },
+        camera: {
+          ...prev.camera,
+          y: newPlayerY * CELL_SIZE,
+        },
+        savePrompt: null,
+      };
+    });
+  }, []);
+
   // Setup input handling
   useInput(
     setKeys,
@@ -88,6 +155,16 @@ export default function NightFarming() {
     handleGameAction,
     gameState
   );
+
+  // Load saved game on startup
+  useEffect(() => {
+    if (hasSaveGame()) {
+      const saveData = loadGame();
+      if (saveData) {
+        setGameState(prev => applySaveData(prev, saveData));
+      }
+    }
+  }, []);
 
   // Setup viewport size tracking
   useEffect(() => {
@@ -136,6 +213,12 @@ export default function NightFarming() {
       />
 
       <HorrorOverlay horrorEvent={gameState.horrorEvent} />
+      
+      <SaveDialog
+        gameState={gameState}
+        onSave={handleSave}
+        onCancel={handleCancelSave}
+      />
     </div>
   );
 }
