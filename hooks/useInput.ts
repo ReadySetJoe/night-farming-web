@@ -1,13 +1,16 @@
 import { useCallback, useEffect } from "react";
-import { KeyState, ToolType } from "../lib/types";
+import { GameState, KeyState, ToolType } from "../lib/types";
 import { GAME_CONTROL_KEYS } from "../lib/constants";
+import { generateToolbar } from "../lib/toolbar";
 
 export const useInput = (
   setKeys: React.Dispatch<React.SetStateAction<KeyState>>,
   setDebugMode: React.Dispatch<React.SetStateAction<boolean>>,
   onToolSelect: (tool: ToolType) => void,
-  onAction: () => void
+  onAction: () => void,
+  gameState: GameState
 ) => {
+  const toolbar = generateToolbar(gameState);
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       const { key } = e;
@@ -41,25 +44,23 @@ export const useInput = (
         case " ":
           onAction();
           break;
-        case "1":
-          onToolSelect("hoe");
-          break;
-        case "2":
-          onToolSelect("seeds");
-          break;
-        case "3":
-          onToolSelect("watering_can");
-          break;
-        case "4":
-          onToolSelect("hand");
-          break;
         case "F3":
         case "f3":
           setDebugMode(prev => !prev);
           break;
+        default:
+          // Dynamic tool selection based on current toolbar
+          const keyNum = parseInt(key);
+          if (keyNum >= 1 && keyNum <= toolbar.length) {
+            const toolItem = toolbar[keyNum - 1];
+            if (!toolItem.disabled) {
+              onToolSelect(toolItem.id as ToolType);
+            }
+          }
+          break;
       }
     },
-    [setKeys, setDebugMode, onToolSelect, onAction]
+    [setKeys, setDebugMode, onToolSelect, onAction, toolbar]
   );
 
   const handleKeyUp = useCallback(

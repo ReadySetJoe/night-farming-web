@@ -1,36 +1,60 @@
 import { useState, useEffect, useCallback } from "react";
-import { GameState, KeyState, ViewportSize, ToolType } from "../lib/types";
+import { GameState, KeyState, ViewportSize, ToolType, SeedType } from "../lib/types";
 import { createWorld } from "../lib/world";
-import { handleAction, getTargetPosition, isTargetActionable } from "../lib/gameLogic";
+import { createMaryNPC } from "../lib/npcs";
+import {
+  handleAction,
+  getTargetPosition,
+  isTargetActionable,
+} from "../lib/gameLogic";
 import { useGameLoop } from "../hooks/useGameLoop";
 import { useInput } from "../hooks/useInput";
+import { useGameTime } from "../hooks/useGameTime";
 import { GameWorld } from "../components/GameWorld";
 import { GameUI } from "../components/GameUI";
-import { 
-  FARM_START_X, 
-  FARM_START_Y, 
-  CELL_SIZE, 
-  STARTING_SEEDS, 
-  STARTING_COINS 
+import {
+  FARM_START_X,
+  FARM_START_Y,
+  CELL_SIZE,
+  STARTING_COINS,
+  STARTING_HOUR,
+  STARTING_MINUTE,
+  STARTING_PARSNIP_SEEDS,
+  STARTING_POTATO_SEEDS,
 } from "../lib/constants";
 
 export default function NightFarming() {
   const [gameState, setGameState] = useState<GameState>({
     player: {
-      x: FARM_START_X + 5,
-      y: FARM_START_Y + 5,
-      pixelX: (FARM_START_X + 5) * CELL_SIZE,
-      pixelY: (FARM_START_Y + 5) * CELL_SIZE,
+      x: 4,
+      y: 4,
+      pixelX: 4 * CELL_SIZE,
+      pixelY: 4 * CELL_SIZE,
       facing: "down",
       isMoving: false,
     },
     camera: {
-      x: (FARM_START_X + 5) * CELL_SIZE,
-      y: (FARM_START_Y + 5) * CELL_SIZE,
+      x: 4 * CELL_SIZE,
+      y: 4 * CELL_SIZE,
     },
     world: createWorld(),
     selectedTool: "hoe",
-    inventory: { seeds: STARTING_SEEDS, crops: 0, coins: STARTING_COINS },
+    inventory: {
+      seeds: {
+        parsnip: STARTING_PARSNIP_SEEDS,
+        potato: STARTING_POTATO_SEEDS,
+      },
+      crops: 0,
+      coins: STARTING_COINS,
+    },
+    currentScene: "exterior",
+    gameTime: {
+      hours: STARTING_HOUR,
+      minutes: STARTING_MINUTE,
+      totalMinutes: STARTING_HOUR * 60 + STARTING_MINUTE,
+    },
+    npcs: [createMaryNPC()],
+    activeDialogue: null,
   });
 
   const [keys, setKeys] = useState<KeyState>({
@@ -52,12 +76,19 @@ export default function NightFarming() {
     setGameState(prev => ({ ...prev, selectedTool: tool }));
   }, []);
 
+
   const handleGameAction = useCallback(() => {
     setGameState(prev => handleAction(prev));
   }, []);
 
   // Setup input handling
-  useInput(setKeys, setDebugMode, handleToolSelect, handleGameAction);
+  useInput(
+    setKeys,
+    setDebugMode,
+    handleToolSelect,
+    handleGameAction,
+    gameState
+  );
 
   // Setup viewport size tracking
   useEffect(() => {
@@ -75,6 +106,7 @@ export default function NightFarming() {
 
   // Setup game loops
   useGameLoop(keys, setGameState);
+  useGameTime(setGameState);
 
   // Get target position for highlighting
   const targetPos = getTargetPosition(gameState.player);
@@ -95,7 +127,7 @@ export default function NightFarming() {
         targetPos={targetPos}
         isActionable={isActionable}
       />
-      
+
       <GameUI
         gameState={gameState}
         debugMode={debugMode}

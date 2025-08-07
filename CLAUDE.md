@@ -1,170 +1,206 @@
-# Night Farming - Development Log
-
-This document tracks the development progress of Night Farming, a browser-based farming simulation game inspired by Stardew Valley, built with Next.js, React, and TypeScript.
+# Night Farming - Game Development Progress
 
 ## Project Overview
-
-Night Farming is a simple farming simulation prototype that serves as the foundation for a future horror-themed farming game. The current implementation focuses on core farming mechanics and smooth gameplay, with plans to gradually introduce horror elements over time.
+Night Farming is a browser-based farming simulation game inspired by Stardew Valley, built with Next.js, React, TypeScript, and Tailwind CSS. The game features a top-down farming experience with smooth movement, collision detection, and a planned gradual introduction of horror elements.
 
 ## Current Features
 
-### 🌍 Game World
-- **30x20 tile world** with varied terrain types
-- **House structure** with walls, floor, and door in the top-left area  
-- **Water feature** (pond) on the right side of the map
-- **Trees** scattered around the world edges for natural boundaries
-- **10x10 farmable area** in the center (brown soil) where crops can be grown
-- **Grass terrain** fills the remaining areas
+### Core Game Mechanics
+- **Advanced Farming System**: Multiple seed types with unique watering requirements and growth patterns
+- **Individual Seed Tools**: Each seed type functions as its own selectable tool
+- **Progressive Watering**: Different crops require different amounts of water to grow
+- **Dynamic Pricing**: Crops sell for different amounts based on their difficulty to grow
+- **Time Management**: Game clock system affecting crop growth timing
 
-### 🎮 Player System
-- **Smooth pixel-based movement** at 60 FPS instead of grid snapping
-- **WASD/Arrow key controls** with hold-to-move functionality
-- **Directional facing system** - player remembers last movement direction
-- **Collision detection** prevents walking through solid terrain (walls, water, trees)
-- **Responsive movement** with proper animation states
+### Movement & Physics
+- **Smooth Pixel Movement**: 60 FPS movement system that transitions smoothly between grid positions
+- **Collision Detection**: Impassable terrain (water, walls, trees, doors) with debug visualization
+- **Player Facing**: Character faces the direction of last movement for intuitive farming actions
+- **Target-Ahead Actions**: Farming actions target the tile in front of the player based on facing direction
 
-### 📷 Camera System
-- **Dynamic camera following** that smoothly tracks the player
-- **Boundary-aware camera** that stops at world edges to prevent showing empty space
-- **Full-screen rendering** that adapts to any browser window size
-- **Optimized tile rendering** - only renders visible tiles plus buffer for performance
+### World & Camera
+- **Enclosed Farm Settlement**: 40x30 tile world completely surrounded by protective fencing (🔸)
+- **Forest Atmosphere**: Dense trees just inside the perimeter create a wilderness feeling
+- **Compact Farm Area**: 12x12 farmable area for focused, manageable cultivation
+- **Repositioned Water Feature**: Water (💧) moved to bottom-right corner for better layout balance
+- **Guided Pathways**: Brown dirt paths (🟫) connect key areas for natural navigation
+  - **House → Farm**: Direct path from front door to farm center
+  - **Farm → Town**: Horizontal path leading to the fence opening
+- **Fence Opening Exit**: Natural gap in right-side fencing leads to town (no walls needed)
+- **Camera System**: Follows player smoothly, clamped to world boundaries
+- **Viewport Culling**: Only renders visible tiles for performance
+- **Scene Transitions**: Seamless movement between exterior farm and interior house
 
-### 🚜 Farming Mechanics
-- **4 tools**: Hoe (🔨), Seeds (🌱), Watering Can (💧), Harvest Hand (✋)
-- **Complete farming cycle**: Till soil → Plant seeds → Water crops → Harvest
-- **Target-ahead action system** - tools affect the tile in front of the player
-- **Crop growth system** - parsnips grow automatically every 3 seconds when watered
-- **4-stage crop progression**: Seedling → Young Plant → Mature → Harvestable
-- **Farming restrictions** - can only farm in the designated brown soil area
+### Advanced Crop System
+#### Multiple Seed Types
+- **🥕 Parsnip Seeds**: 
+  - Easy beginner crop requiring only 1 watering total
+  - 3 growth stages: 🌱 → 🌿 → 🌾 → 🥕
+  - Sells for 50 coins
+  - Grows quickly with minimal care
 
-### 💾 Game State Management
-- **Inventory system** tracks seeds, harvested crops, and coins
-- **Real-time crop growth** with automatic progression
-- **Persistent tool selection** with keyboard shortcuts (1-4)
-- **Economic system** - earn 50 coins per harvested crop
+- **🥔 Potato Seeds**:
+  - Advanced crop requiring 3 waterings total  
+  - 4 growth stages: 🌱 → 🌿 → 🟫 → 🔸 → 🥔
+  - Sells for 80 coins (higher reward for difficulty)
+  - Requires careful water management
 
-### 🎨 User Interface
-- **Overlay-based UI** positioned on top of the game world
-- **Inventory display** showing current resources
-- **Tool selection panel** with visual feedback for active tool
-- **Controls help panel** for easy reference
-- **Semi-transparent panels** with backdrop blur for visual clarity
+#### Sophisticated Watering Mechanics
+- **Watering Tracking**: Each crop individually tracks waterings received vs required
+- **Stage-Based Requirements**: Crops must be fully watered before advancing to next growth stage
+- **Visual Feedback**: Partially watered crops show 💧 indicator
+- **Reset System**: Watering counters reset after each growth stage advance
+- **Progressive Growth**: Only fully watered crops can advance stages over time
 
-### 🔧 Debug System
-- **F3 toggle** for debug mode
-- **Visual collision boundaries** with color-coded overlays:
-  - 🟥 Red: House walls
-  - 🟦 Blue: Water areas  
-  - 🟫 Brown: Trees
-- **Real-time debug info** showing player position, facing direction, movement state
-- **Terrain type display** for current player location
-- **Grid and pixel coordinate tracking**
+### UI & Interface Evolution
+#### Dynamic Toolbar System
+- **Individual Seed Tools**: Each seed type appears as its own tool slot
+- **Smart Tool Generation**: Toolbar dynamically generates based on current inventory
+- **Automatic Key Mapping**: Number keys (1-5+) automatically map to available tools
+- **Visual States**: Tools show count badges, disable when empty, highlight when selected
+- **Extensible Design**: Easy to add new tools/seeds that automatically get toolbar slots
 
-## Technical Implementation
+#### Enhanced UI Layout
+- **Bottom-Center Toolbar**: Large, prominent tool selection with enhanced styling
+- **Top-Right Time Panel**: Game clock (6:00 AM start) with coins display
+- **Tool Organization**: Base tools first (Hoe, Water, Harvest), then available seeds
+- **Count Badges**: Seed tools show remaining quantity with stylized counters
+- **Disabled States**: Empty seed tools gray out and become unclickable
 
-### Architecture
-- **Next.js 15.4.6** with React 19.1.0 and TypeScript 5
-- **Tailwind CSS 4** for styling with utility classes
-- **Custom game loop** running at 60 FPS using `setInterval`
-- **State management** with React hooks (useState, useEffect, useCallback)
+### Scene System & NPCs
+- **Multi-Scene World**: Three connected areas - farm exterior, house interior, and town square
+- **Walkthrough Transitions**: Automatic scene changes by walking through exit tiles (no spacebar needed)
+- **Town Square**: 30x25 town area with buildings, fountain, and cobblestone paths
+- **Improved Exit System**: Simple, intuitive entrance points
+  - **Farm → Town**: 3-tile fence opening on right edge (🌆 tiles) - walk through the gap
+  - **Town → Farm**: 3-tile exit on far left edge (🚜 tiles) - maximum separation for clarity
+- **Natural Pathways**: Brown paths lead directly to fence openings
+- **House Interior**: Smaller interior space with furniture, centered with black void background
+- **Door Interactions**: Use spacebar on doors to enter/exit house (house only)
 
-### Performance Optimizations
-- **Viewport culling** - only renders visible world tiles
-- **Dynamic tile calculation** based on screen size and camera position  
-- **Optimized collision detection** with early bounds checking
-- **Smooth camera interpolation** to reduce jarring movements
-- **SSR-safe window access** for proper Next.js compatibility
+#### NPC System
+- **Smooth NPC Movement**: NPCs move with pixel-perfect movement similar to player
+- **Meandering AI**: Mary follows town pathways, visiting each building with natural pauses
+- **Building Visits**: Mary stops in front of each building (3+ second pauses) before continuing
+- **Pathway Navigation**: NPCs use the brown pathway system to navigate naturally
+- **Variable Movement**: Slower speed (1.5px/frame) creates relaxed, contemplative feel
+- **Dialogue System**: Interactive conversations with spacebar activation
+- **Mary Character**: Friendly town resident (👩‍🌾) with location-aware dialogue
+- **Interaction Range**: Walk within 1.5 tiles of NPCs to interact
+- **Modal Dialogue**: Full-screen dialogue boxes with NPC portraits and continue prompts
 
-### Key Systems
+### Time Management
+- **Game Clock**: Starts at 6:00 AM, advances 10 minutes every 5 seconds real-time
+- **12-Hour Format**: Displays with AM/PM for natural time reading
+- **Growth Timing**: Crops grow based on game time intervals (3 seconds per stage when watered)
+- **Visual Integration**: Clock prominently displayed with enhanced padding
 
-#### Movement System
-- Pixel-based coordinates alongside grid coordinates for smooth movement
-- Continuous movement while keys are held down
-- Direction-based facing system for contextual actions
-- Collision detection prevents movement into solid terrain
+## Technical Architecture
 
-#### Collision Detection
-- Grid-based solid terrain checking (walls, water, trees)
-- Real-time collision validation before movement
-- Safety fallback system to prevent players getting stuck in solid terrain
-- Debug visualization for collision boundaries
+### Enhanced File Structure
+```
+/lib/
+  constants.ts    - Game configuration, base tools, timing constants
+  types.ts        - Advanced TypeScript interfaces with seed/crop types
+  world.ts        - World generation and house interior creation
+  collision.ts    - Collision detection with door collision support
+  gameLogic.ts    - Core farming mechanics with multi-seed support
+  seeds.ts        - Seed configuration system and crop display logic
+  toolbar.ts      - Dynamic toolbar generation system
 
-#### Camera System  
-- Smooth interpolated following of player movement
-- Boundary clamping to prevent showing areas outside the game world
-- Dynamic viewport sizing based on browser window dimensions
-- Efficient tile culling for performance
+/hooks/
+  useGameLoop.ts  - Movement, camera, and advanced crop growth loops
+  useInput.ts     - Dynamic keyboard input with toolbar-aware shortcuts
+  useGameTime.ts  - Game clock system with 10-minute increments
 
-#### World Generation
-- Procedural placement of houses, water features, and trees
-- Designated farming areas separate from decorative terrain
-- Logical world layout with natural boundaries
+/components/
+  GameWorld.tsx   - World rendering with interior/exterior scene support
+  GameUI.tsx      - Advanced UI with dynamic toolbar and time display
 
-## Development History
-
-### Phase 1: Basic Setup
-- Created Next.js project with TypeScript and Tailwind
-- Implemented basic grid-based farming game with 10x10 farm
-- Added player movement, tools, and crop growing mechanics
-
-### Phase 2: Enhanced Movement
-- Replaced grid-snapping with smooth pixel-based movement
-- Added 60 FPS game loop for responsive controls
-- Implemented facing direction tracking
-- Created target-ahead action system
-
-### Phase 3: World Expansion  
-- Expanded from 10x10 farm to 30x20 world
-- Added house, water features, and trees around the farm
-- Implemented camera system with smooth following
-- Made game fill entire browser viewport
-
-### Phase 4: Collision & Polish
-- Added comprehensive collision detection system
-- Implemented debug visualization with F3 toggle
-- Created overlay-based UI system
-- Added real-time debug information panel
-
-## Future Roadmap
-
-### Immediate Improvements
-- Add more crop types with different growth times
-- Implement tool durability and upgrades  
-- Add day/night cycle system
-- Create save/load functionality
-
-### Horror Elements (Future)
-- Mysterious crop failures during certain nights
-- Strange sounds and visual effects
-- Unexplained changes to the farm layout
-- Gradual introduction of supernatural elements
-
-### Gameplay Expansion  
-- Multiple farm areas to unlock
-- NPC characters and dialogue system
-- Seasonal weather effects
-- Market system for selling crops
-
-## Technical Notes
-
-### Running the Project
-```bash
-npm run dev    # Development server
-npm run build  # Production build  
-npm run start  # Production server
-npm run lint   # ESLint checking
+pages/index.tsx   - Main game orchestration with enhanced state management
 ```
 
-### Key Files
-- `pages/index.tsx` - Main game component with all systems
-- `styles/globals.css` - Global styles and Tailwind imports
-- `next.config.ts` - Next.js configuration
-- `tsconfig.json` - TypeScript configuration
+### Advanced Systems
+- **Dynamic Tool Management**: Tools auto-generate based on inventory state
+- **Multi-Stage Crop Growth**: Complex watering requirements and growth validation
+- **Scene Management**: Proper interior/exterior world state handling
+- **Time Progression**: Integrated clock system affecting game mechanics
 
-### Debug Controls
-- **F3** - Toggle debug mode to show collision boundaries and player info
-- **1-4** - Select farming tools
-- **WASD/Arrows** - Move player
-- **Space** - Use selected tool on tile in front of player
+## Current Toolbar Layout (Dynamic)
+1. 🔨 **Hoe** (Key: 1) - Till farmable soil
+2. 💧 **Water** (Key: 2) - Water planted crops (progressive system)
+3. ✋ **Harvest** (Key: 3) - Collect mature crops for coins
+4. 🥕 **Parsnip Seeds** (Key: 4) - Plant easy-growing parsnips (5 starting)
+5. 🥔 **Potato Seeds** (Key: 5) - Plant advanced potatoes (3 starting)
 
-The game successfully demonstrates smooth 2D gameplay with proper collision detection, responsive controls, and a solid foundation for future expansion into horror elements.
+*Note: Toolbar automatically adjusts when seeds run out or new types are added*
+
+## Recent Major Updates
+
+### Individual Seed Tool System
+Completely redesigned the planting system:
+- **Removed Generic "Seeds" Tool**: No more universal planting tool
+- **Individual Seed Selection**: Each seed type is now its own selectable tool
+- **Direct Planting**: Select parsnip tool → plant parsnips, select potato tool → plant potatoes
+- **Inventory-Based Availability**: Seeds only appear as tools when you have them
+- **Future-Ready Architecture**: Built for planned user-customizable toolbar organization
+
+### Advanced Watering Requirements
+- **Parsnips**: Simple 1-watering system for beginners
+- **Potatoes**: Complex 3-watering system requiring planning and resource management
+- **Progressive Growth**: Crops won't advance until watering requirements are met
+- **Visual Feedback**: Clear indicators for watering progress and completion
+
+### Enhanced User Experience
+- **Larger UI Elements**: More prominent toolbar and time display
+- **Better Visual Hierarchy**: Clear separation between tools and inventory
+- **Intuitive Controls**: Direct tool selection without multi-step processes
+- **Professional Styling**: Enhanced borders, shadows, and hover effects
+
+## Development Philosophy
+
+### Code Quality & Architecture
+- **TypeScript-First**: Comprehensive type safety prevents runtime errors
+- **Modular Design**: Clean separation enables easy feature addition
+- **Performance-Conscious**: Efficient rendering and state management
+- **Extensible Foundation**: Built to support complex future features
+
+### User Experience Focus  
+- **Intuitive Controls**: Direct tool selection mirrors professional game UX
+- **Visual Clarity**: Clear feedback for all game states and interactions
+- **Progressive Complexity**: Simple parsnips introduce farming, potatoes add depth
+- **Responsive Design**: Toolbar and UI adapt to different screen sizes
+
+### Future Roadmap Preparation
+- **Horror Integration Ready**: Architecture supports gradual suspense introduction
+- **Customizable Toolbar**: Foundation laid for drag-and-drop tool organization
+- **Expandable Crop System**: Easy configuration for unlimited seed varieties
+- **Advanced Mechanics**: Framework ready for seasons, weather, NPCs
+
+## Technical Debt & Considerations
+- **Performance**: Consider virtualization for very large farms
+- **Save System**: Architecture ready for persistent game state
+- **Mobile Adaptation**: Touch controls could be added to existing input system
+- **Accessibility**: Consider adding screen reader support and keyboard navigation hints
+
+## Getting Started
+```bash
+npm install
+npm run dev
+```
+
+Game runs at `http://localhost:3000` with full-screen farming experience.
+
+### Controls
+- **WASD/Arrow Keys**: Move player
+- **Spacebar**: Use selected tool or interact with doors
+- **1-5**: Select tools (Hoe, Water, Harvest, Parsnip Seeds, Potato Seeds)
+- **F3**: Toggle debug mode
+- **Click**: Select tools from toolbar
+
+### Gameplay Tips
+- Start with parsnips (easy 1-watering system)
+- Progress to potatoes for higher profits (3-watering requirement)
+- Water crops multiple times before they'll grow to next stage
+- Enter house via spacebar on front door
+- Debug mode shows collision boundaries and watering progress
