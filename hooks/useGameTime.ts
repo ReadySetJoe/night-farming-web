@@ -18,6 +18,7 @@ export const useGameTime = (
             hours: newHours,
             minutes: newMinutes,
             totalMinutes: newTotalMinutes,
+            day: prev.gameTime.day, // Preserve the day value
           },
         };
       });

@@ -36,7 +36,7 @@ export const SaveDialog: React.FC<SaveDialogProps> = ({
               Save your progress and advance to Day {(gameState.gameTime?.day || 1) + 1}?
             </p>
             <p className="text-sm text-gray-400">
-              You'll wake up at 6:00 AM tomorrow.
+              You&apos;ll wake up at 6:00 AM tomorrow.
             </p>
           </div>
           

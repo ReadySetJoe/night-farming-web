@@ -30,7 +30,7 @@ export const saveGame = (gameState: GameState): void => {
     if (savedExterior && savedExterior !== "undefined" && savedExterior !== "null") {
       try {
         exteriorWorld = JSON.parse(savedExterior);
-      } catch (error) {
+      } catch {
         console.warn("Failed to parse saved exterior world, using current world");
         exteriorWorld = gameState.world;
       }

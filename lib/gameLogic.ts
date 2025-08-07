@@ -7,7 +7,6 @@ import {
   ToolType,
   SeedType,
   DroppedItem,
-  TreeData,
 } from "./types";
 import {
   WORLD_WIDTH,
@@ -221,7 +220,7 @@ export const handleAction = (prevState: GameState): GameState => {
       if (savedExterior && savedExterior !== "undefined" && savedExterior !== "null") {
         try {
           exteriorWorld = JSON.parse(savedExterior);
-        } catch (error) {
+        } catch {
           console.warn("Failed to parse saved exterior world, creating new one");
           exteriorWorld = createWorld();
         }
@@ -593,6 +592,7 @@ export const updateDroppedItems = (state: GameState): GameState => {
   const playerCenterY = player.y + 0.5;
   const currentTime = Date.now();
   
+  // eslint-disable-next-line prefer-const
   let newInventory = { ...inventory };
   const updatedItems: DroppedItem[] = [];
   

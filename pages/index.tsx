@@ -26,7 +26,6 @@ import {
 } from "../lib/constants";
 
 export default function NightFarming() {
-  const [exteriorWorldBackup, setExteriorWorldBackup] = useState<any>(null);
   const [gameState, setGameState] = useState<GameState>({
     player: {
       x: 4,
