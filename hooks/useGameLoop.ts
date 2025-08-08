@@ -1,10 +1,11 @@
 import { useEffect } from "react";
 import { GameState, KeyState } from "../lib/types";
 import { checkCollision, isSolid } from "../lib/collision";
-import { createWorld, createTownSquare, createArena } from "../lib/world";
+import { createWorld, createTownSquare, createArena, createHouseInterior } from "../lib/world";
 import { getNPCFacing } from "../lib/npcs";
 import { isHorrorEventActive } from "../lib/horror";
 import { updateDroppedItems } from "../lib/gameLogic";
+import { updateEnemyAI, checkEntityCollision, createEnemy } from "../lib/enemies";
 import {
   WORLD_WIDTH,
   WORLD_HEIGHT,
@@ -15,6 +16,8 @@ import {
   CROP_GROWTH_INTERVAL,
   STAMINA_DECAY_RATE,
   STAMINA_DECAY_INTERVAL,
+  INVULNERABILITY_DURATION,
+  ENEMY_DAMAGE,
 } from "../lib/constants";
 
 export const useGameLoop = (
@@ -177,10 +180,24 @@ export const useGameLoop = (
           const arenaEntranceX = arenaWorld[0].length - 2; // One tile inside from the right edge
           const arenaEntranceY = Math.floor(arenaWorld.length / 2);
 
+          // Spawn an enemy in the arena if none exists (and we're actually entering from exterior)
+          const arenaEnemies = prev.enemies.filter(enemy => enemy.scene === "arena");
+          let enemies = [...prev.enemies];
+          
+          // Only spawn if no arena enemies exist AND we don't already have the arena_slime
+          if (arenaEnemies.length === 0 && !prev.enemies.find(e => e.id === "arena_slime")) {
+            // Create a slime enemy in the center of the arena
+            const centerX = Math.floor(arenaWorld[0].length / 2);
+            const centerY = Math.floor(arenaWorld.length / 2);
+            const slime = createEnemy("arena_slime", "slime", centerX, centerY, "arena");
+            enemies.push(slime);
+          }
+
           return {
             ...prev,
             currentScene: "arena",
             world: arenaWorld,
+            enemies,
             player: {
               ...newPlayer,
               x: arenaEntranceX,
@@ -232,6 +249,107 @@ export const useGameLoop = (
 
         // Update dropped items physics and collection
         let updatedState = updateDroppedItems({ ...prev, player: newPlayer, camera: newCamera });
+
+        // Update player invulnerability timer
+        if (updatedState.player.invulnerable && updatedState.player.invulnerabilityTimer > 0) {
+          updatedState = {
+            ...updatedState,
+            player: {
+              ...updatedState.player,
+              invulnerabilityTimer: Math.max(0, updatedState.player.invulnerabilityTimer - 16), // ~60 FPS
+              invulnerable: updatedState.player.invulnerabilityTimer > 16,
+            },
+          };
+        }
+
+        // Update player sword swing timer
+        if (updatedState.player.isSwinging && updatedState.player.swingTimer > 0) {
+          updatedState = {
+            ...updatedState,
+            player: {
+              ...updatedState.player,
+              swingTimer: Math.max(0, updatedState.player.swingTimer - 16), // ~60 FPS
+              isSwinging: updatedState.player.swingTimer > 16,
+            },
+          };
+        }
+
+        // Update enemies and check for collisions
+        const currentSceneEnemies = updatedState.enemies.filter(enemy => enemy.scene === updatedState.currentScene);
+        const otherEnemies = updatedState.enemies.filter(enemy => enemy.scene !== updatedState.currentScene);
+        
+        const updatedEnemies = currentSceneEnemies.map(enemy => {
+          // Update enemy AI
+          const worldBounds = {
+            width: updatedState.world[0].length * CELL_SIZE,
+            height: updatedState.world.length * CELL_SIZE,
+          };
+          
+          const updatedEnemy = updateEnemyAI(
+            enemy,
+            updatedState.player.pixelX,
+            updatedState.player.pixelY,
+            worldBounds
+          );
+
+          // Check for collision with player
+          if (!updatedState.player.invulnerable && checkEntityCollision(updatedState.player, updatedEnemy)) {
+            // Deal damage to player and make them invulnerable
+            const newHealth = Math.max(0, updatedState.player.health - ENEMY_DAMAGE);
+            
+            updatedState = {
+              ...updatedState,
+              player: {
+                ...updatedState.player,
+                health: newHealth,
+                invulnerable: true,
+                invulnerabilityTimer: INVULNERABILITY_DURATION,
+              },
+            };
+
+            // If player died, send them back to bed and advance day
+            if (newHealth <= 0) {
+              const newDay = updatedState.gameTime.day + 1;
+              
+              updatedState = {
+                ...updatedState,
+                currentScene: "interior",
+                world: createHouseInterior(),
+                gameTime: {
+                  hours: 6, // 6:00 AM
+                  minutes: 0,
+                  totalMinutes: 6 * 60,
+                  day: newDay,
+                },
+                player: {
+                  ...updatedState.player,
+                  x: 4, // Bed position in interior
+                  y: 3,
+                  pixelX: 4 * CELL_SIZE,
+                  pixelY: 3 * CELL_SIZE,
+                  health: updatedState.player.maxHealth, // Restore full health
+                  invulnerable: false,
+                  invulnerabilityTimer: 0,
+                  stamina: updatedState.player.maxStamina, // Restore stamina
+                  isSwinging: false,
+                  swingTimer: 0,
+                },
+                camera: {
+                  x: 4 * CELL_SIZE,
+                  y: 3 * CELL_SIZE,
+                },
+              };
+            }
+          }
+
+          return updatedEnemy;
+        });
+
+        // Combine updated enemies with enemies from other scenes
+        updatedState = {
+          ...updatedState,
+          enemies: [...otherEnemies, ...updatedEnemies],
+        };
 
         // Check for bed interaction in house interior
         if (updatedState.currentScene === "interior") {

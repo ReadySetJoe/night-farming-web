@@ -24,6 +24,7 @@ import {
   CROP_PICKUP_DELAY,
   STAMINA_COSTS,
 } from "./constants";
+import { applySwordAttack } from "./enemies";
 import {
   createHouseInterior,
   createTownSquare,
@@ -129,6 +130,7 @@ export const handleAction = (prevState: GameState): GameState => {
     npcs,
     activeDialogue,
   } = prevState;
+
   const targetPos = getTargetPosition(player);
   const { x: targetX, y: targetY } = targetPos;
   const targetCell = world[targetY]?.[targetX];
@@ -359,6 +361,47 @@ export const handleAction = (prevState: GameState): GameState => {
     };
   }
 
+  // Handle sword attacks first (can happen in any scene)
+  if (selectedTool === "sword") {
+    // Prevent rapid swinging
+    if (player.isSwinging) {
+      return prevState;
+    }
+
+    const worldBounds = {
+      width: world[0].length * CELL_SIZE,
+      height: world.length * CELL_SIZE,
+    };
+    
+    
+    // Only process enemies in the current scene
+    const currentSceneEnemies = prevState.enemies.filter(e => e.scene === currentScene);
+    const otherSceneEnemies = prevState.enemies.filter(e => e.scene !== currentScene);
+    
+    const updatedCurrentSceneEnemies = applySwordAttack(
+      currentSceneEnemies,
+      player.pixelX,
+      player.pixelY,
+      player.facing,
+      worldBounds
+    );
+    
+    
+    // Remove dead enemies and combine with other scene enemies
+    const aliveCurrentSceneEnemies = updatedCurrentSceneEnemies.filter(enemy => enemy.health > 0);
+    const allEnemies = [...otherSceneEnemies, ...aliveCurrentSceneEnemies];
+    
+    return {
+      ...prevState,
+      enemies: allEnemies,
+      player: {
+        ...player,
+        isSwinging: true,
+        swingTimer: 300, // 300ms swing duration
+      },
+    };
+  }
+
   // Allow forge interaction in blacksmith, but otherwise only farming in exterior
   if (currentScene !== "exterior" && !(targetCell === "forge" && currentScene === "blacksmith")) {
     return prevState;
@@ -366,6 +409,7 @@ export const handleAction = (prevState: GameState): GameState => {
 
   const newWorld = world.map(row => [...row]);
   const newInventory = { ...inventory };
+
 
   // Handle axe on trees (can happen anywhere in exterior)
   if (selectedTool === "axe" && targetCell === "tree" && currentScene === "exterior") {
@@ -424,6 +468,7 @@ export const handleAction = (prevState: GameState): GameState => {
       };
     }
   }
+
 
   // Check if target is on farmable land
   const farmX = targetX - FARM_START_X;

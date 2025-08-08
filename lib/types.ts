@@ -21,6 +21,12 @@ export interface Player {
   stamina: number;
   maxStamina: number;
   isResting: boolean;
+  health: number;
+  maxHealth: number;
+  invulnerable: boolean;
+  invulnerabilityTimer: number;
+  isSwinging: boolean;
+  swingTimer: number;
 }
 
 export interface Camera {
@@ -99,6 +105,7 @@ export interface GameState {
     day: number;
   };
   npcs: NPC[];
+  enemies: Enemy[];
   activeDialogue: {
     npcId: string;
     text: string;
@@ -130,7 +137,7 @@ export interface TargetPosition {
 }
 
 export type TerrainType = Crop | null | string;
-export type ToolType = "hoe" | "watering_can" | "hand" | "axe" | "wood" | "parsnip_crop" | "potato_crop" | SeedType | string;
+export type ToolType = "hoe" | "watering_can" | "hand" | "axe" | "sword" | "wood" | "parsnip_crop" | "potato_crop" | SeedType | string;
 
 export interface SeedConfig {
   name: string;
@@ -156,4 +163,31 @@ export interface DroppedItem {
 export interface TreeData {
   health: number;
   maxHealth: number;
+}
+
+export interface Enemy {
+  id: string;
+  type: "slime" | "bat" | "skeleton";
+  x: number;
+  y: number;
+  pixelX: number;
+  pixelY: number;
+  health: number;
+  maxHealth: number;
+  speed: number;
+  damage: number;
+  lastDamageTime: number;
+  scene: string;
+  facing: "up" | "down" | "left" | "right";
+  isMoving: boolean;
+  // AI behavior properties
+  targetX?: number;
+  targetY?: number;
+  behaviorTimer: number;
+  currentBehavior: "chase" | "wander" | "pause";
+  // Knockback properties
+  isKnockedBack: boolean;
+  knockbackVelocityX: number;
+  knockbackVelocityY: number;
+  knockbackTimer: number;
 }

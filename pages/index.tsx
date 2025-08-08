@@ -15,6 +15,7 @@ import { GameUI } from "../components/GameUI";
 import { HorrorOverlay } from "../components/HorrorOverlay";
 import { SaveDialog } from "../components/SaveDialog";
 import { StaminaBar } from "../components/StaminaBar";
+import { HealthBar } from "../components/HealthBar";
 import {
   saveGame,
   loadGame,
@@ -30,6 +31,7 @@ import {
   STARTING_POTATO_SEEDS,
   STARTING_WOOD,
   MAX_STAMINA,
+  MAX_HEALTH,
 } from "../lib/constants";
 
 export default function NightFarming() {
@@ -44,6 +46,12 @@ export default function NightFarming() {
       stamina: MAX_STAMINA,
       maxStamina: MAX_STAMINA,
       isResting: false,
+      health: MAX_HEALTH,
+      maxHealth: MAX_HEALTH,
+      invulnerable: false,
+      invulnerabilityTimer: 0,
+      isSwinging: false,
+      swingTimer: 0,
     },
     camera: {
       x: 4 * CELL_SIZE,
@@ -76,6 +84,7 @@ export default function NightFarming() {
     droppedItems: [],
     treeHealth: new Map(),
     savePrompt: null,
+    enemies: [],
   });
 
   const [keys, setKeys] = useState<KeyState>({
@@ -228,6 +237,12 @@ export default function NightFarming() {
         stamina={gameState.player.stamina}
         maxStamina={gameState.player.maxStamina}
         isResting={false}
+      />
+
+      <HealthBar
+        health={gameState.player.health}
+        maxHealth={gameState.player.maxHealth}
+        invulnerable={gameState.player.invulnerable}
       />
 
       <SaveDialog

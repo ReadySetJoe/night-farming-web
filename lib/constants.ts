@@ -39,6 +39,20 @@ export const STAMINA_COSTS = {
 export const STAMINA_DECAY_RATE = 0.1; // Gradual stamina loss per tick
 export const STAMINA_DECAY_INTERVAL = 5000; // 5 seconds between decay ticks
 
+// Health & Combat
+export const MAX_HEALTH = 100;
+export const INVULNERABILITY_DURATION = 1500; // 1.5 seconds of invincibility after taking damage
+export const ENEMY_DAMAGE = 10; // Base damage enemies deal to player
+export const ENEMY_DAMAGE_COOLDOWN = 1000; // 1 second between enemy attacks
+
+// Sword combat
+export const SWORD_DAMAGE = 25; // Damage dealt by sword
+export const SWORD_RANGE = CELL_SIZE * 1.5; // Range of sword attack
+export const KNOCKBACK_DISTANCE = CELL_SIZE * 2; // How far enemies get knocked back
+export const SWORD_SWING_DURATION = 300; // 300ms sword swing animation
+export const KNOCKBACK_DURATION = 400; // 400ms knockback animation duration
+export const KNOCKBACK_FRICTION = 0.85; // Friction applied to knockback velocity
+
 // Tree chopping
 export const TREE_MAX_HEALTH = 3;
 export const WOOD_DROP_COUNT = 3;
@@ -56,6 +70,7 @@ export const BASE_TOOLS = [
   { id: "watering_can", icon: "💧", name: "Water", key: "2" },
   { id: "hand", icon: "✋", name: "Harvest", key: "3" },
   { id: "axe", icon: "🪓", name: "Axe", key: "4" },
+  { id: "sword", icon: "⚔️", name: "Sword", key: "5" },
 ] as const;
 
 // Input keys

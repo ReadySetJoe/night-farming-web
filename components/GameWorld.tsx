@@ -2,6 +2,7 @@ import React from "react";
 import { GameState, TargetPosition, ViewportSize } from "../lib/types";
 import { getCellDisplay } from "../lib/gameLogic";
 import { isSolid } from "../lib/collision";
+import { getEnemyDisplay } from "../lib/enemies";
 import { CELL_SIZE, WORLD_WIDTH, WORLD_HEIGHT } from "../lib/constants";
 
 interface GameWorldProps {
@@ -372,6 +373,25 @@ export const GameWorld: React.FC<GameWorldProps> = ({
           </div>
         ))}
 
+      {/* Enemies */}
+      {gameState.enemies
+        .filter(enemy => enemy.scene === gameState.currentScene)
+        .map(enemy => (
+          <div
+            key={enemy.id}
+            className="absolute flex items-center justify-center z-19"
+            style={{
+              left: enemy.pixelX - cameraX + halfViewportWidth,
+              top: enemy.pixelY - cameraY + halfViewportHeight,
+              width: CELL_SIZE,
+              height: CELL_SIZE,
+              fontSize: "32px",
+            }}
+          >
+            {getEnemyDisplay(enemy)}
+          </div>
+        ))}
+
       {/* Player */}
       <div
         className="absolute flex items-center justify-center z-20"
@@ -385,6 +405,32 @@ export const GameWorld: React.FC<GameWorldProps> = ({
       >
         👨‍🌾
       </div>
+
+      {/* Sword swing animation */}
+      {gameState.player.isSwinging && (
+        <div
+          className="absolute flex items-center justify-center z-21 pointer-events-none"
+          style={{
+            left: gameState.player.pixelX - cameraX + halfViewportWidth + 
+              (gameState.player.facing === "right" ? CELL_SIZE * 0.7 :
+               gameState.player.facing === "left" ? -CELL_SIZE * 0.7 : 0),
+            top: gameState.player.pixelY - cameraY + halfViewportHeight + 
+              (gameState.player.facing === "down" ? CELL_SIZE * 0.7 :
+               gameState.player.facing === "up" ? -CELL_SIZE * 0.7 : 0),
+            width: CELL_SIZE,
+            height: CELL_SIZE,
+            fontSize: "28px",
+            transform: `rotate(${
+              gameState.player.facing === "right" ? "0deg" :
+              gameState.player.facing === "down" ? "90deg" :
+              gameState.player.facing === "left" ? "180deg" : "-90deg"
+            })`,
+            animation: "pulse 0.3s ease-out",
+          }}
+        >
+          ⚔️
+        </div>
+      )}
     </div>
   );
 };
