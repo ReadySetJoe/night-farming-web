@@ -368,11 +368,6 @@ export const handleAction = (prevState: GameState): GameState => {
       return prevState;
     }
 
-    const worldBounds = {
-      width: world[0].length * CELL_SIZE,
-      height: world.length * CELL_SIZE,
-    };
-    
     
     // Only process enemies in the current scene
     const currentSceneEnemies = prevState.enemies.filter(e => e.scene === currentScene);
@@ -382,8 +377,7 @@ export const handleAction = (prevState: GameState): GameState => {
       currentSceneEnemies,
       player.pixelX,
       player.pixelY,
-      player.facing,
-      worldBounds
+      player.facing
     );
     
     

@@ -1,5 +1,5 @@
 import { Enemy } from "./types";
-import { CELL_SIZE, SWORD_DAMAGE, SWORD_RANGE, KNOCKBACK_DISTANCE, KNOCKBACK_DURATION, KNOCKBACK_FRICTION } from "./constants";
+import { CELL_SIZE, SWORD_DAMAGE, SWORD_RANGE, KNOCKBACK_DURATION, KNOCKBACK_FRICTION } from "./constants";
 
 // Enemy configurations
 export const ENEMY_CONFIGS = {
@@ -114,7 +114,6 @@ export const updateEnemyAI = (
   worldBounds: { width: number; height: number }
 ): Enemy => {
   const updatedEnemy = { ...enemy };
-  const currentTime = Date.now();
   
   // Handle knockback first (overrides normal AI)
   if (updatedEnemy.isKnockedBack && updatedEnemy.knockbackTimer > 0) {
@@ -287,8 +286,7 @@ export const applySwordAttack = (
   enemies: Enemy[],
   playerPixelX: number,
   playerPixelY: number,
-  playerFacing: "up" | "down" | "left" | "right",
-  worldBounds: { width: number; height: number }
+  playerFacing: "up" | "down" | "left" | "right"
 ): Enemy[] => {
   return enemies.map(enemy => {
     // Check if enemy is in sword range and direction
