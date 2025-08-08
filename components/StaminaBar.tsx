@@ -9,7 +9,6 @@ interface StaminaBarProps {
 export const StaminaBar: React.FC<StaminaBarProps> = ({
   stamina,
   maxStamina,
-  isResting,
 }) => {
   const percentage = (stamina / maxStamina) * 100;
   

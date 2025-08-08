@@ -2,8 +2,6 @@ import { TerrainType } from "./types";
 import {
   SOLID_TERRAIN_TYPES,
   CELL_SIZE,
-  WORLD_WIDTH,
-  WORLD_HEIGHT,
 } from "./constants";
 
 export const isSolid = (terrain: TerrainType): boolean => {

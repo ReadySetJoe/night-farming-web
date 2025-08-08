@@ -2,210 +2,176 @@
 
 ## Project Overview
 
-Night Farming is a browser-based farming simulation game inspired by Stardew Valley, built with Next.js, React, TypeScript, and Tailwind CSS. The game features a top-down farming experience with smooth movement, collision detection, and a planned gradual introduction of horror elements.
+Night Farming is a browser-based farming simulation game inspired by Stardew Valley, built with Next.js, React, TypeScript, and Tailwind CSS. The game features a top-down farming experience with smooth movement, collision detection, stamina management, physics-based item collection, save system, and multiple connected scenes including a dedicated combat arena. The architecture is designed for gradual introduction of horror elements.
 
-## Current Features
+## Current System Status ✅
 
-### Core Game Mechanics
+### ⚡ Stamina System (COMPLETE)
+- **Daily Resource Management**: 100 stamina max, depletes with actions and time
+- **Action Costs**: Farming (1), Tree chopping (3), with stamina gates preventing overuse
+- **Time Decay**: Gradual stamina loss (0.1 per 5 seconds) creates time pressure
+- **Sleep Recovery**: Only sleeping in bed restores stamina to full and advances day
+- **Visual Feedback**: Color-coded stamina bar with exhaustion warnings
 
-- **Advanced Farming System**: Multiple seed types with unique watering requirements and growth patterns
-- **Individual Seed Tools**: Each seed type functions as its own selectable tool
-- **Progressive Watering**: Different crops require different amounts of water to grow
-- **Dynamic Pricing**: Crops sell for different amounts based on their difficulty to grow
-- **Time Management**: Game clock system affecting crop growth timing
+### 🎯 Physics-Based Item System (COMPLETE)
+- **Item Drops**: Crops and wood items "pop out" with realistic physics
+- **Magnetic Collection**: Items attracted to player when in range with pickup delays
+- **Pickup Timing**: Wood (1.5s delay), Crops (0.5s delay) prevents instant collection
+- **Toolbar Integration**: All collected items go directly to expanded toolbar inventory
 
-### Movement & Physics
+### 🏠 Multi-Scene World System (COMPLETE)
+- **Exterior Farm** (40x30): Main farming world with house, water, trees, and paths
+- **House Interior** (12x8): Player's home with bed, furniture, save functionality
+- **Town Square** (30x25): Central hub with buildings, NPCs, fountain, pathways
+- **Arena** (20x15): Combat-ready arena with stone walls and torch decorations
+- **Building Interiors**: General Store, Blacksmith, Cozy House (each with unique layouts)
+- **Seamless Transitions**: Walkthrough exits between all connected areas
 
-- **Smooth Pixel Movement**: 60 FPS movement system that transitions smoothly between grid positions
-- **Collision Detection**: Impassable terrain (water, walls, trees, doors) with debug visualization
-- **Player Facing**: Character faces the direction of last movement for intuitive farming actions
-- **Target-Ahead Actions**: Farming actions target the tile in front of the player based on facing direction
+### 🌾 Advanced Farming System (COMPLETE)
+- **Multi-Stage Crops**: Parsnips (1 watering), Potatoes (3 waterings) with visual growth
+- **Individual Seed Tools**: Each seed type is its own selectable toolbar tool
+- **Progressive Watering**: Crops advance stages only when watering requirements met
+- **Economic Balance**: Higher difficulty crops yield better profits (50 vs 80 coins)
+- **Dynamic Pricing**: Strategic crop selection based on effort vs reward
 
-### World & Camera
+### 💾 Save System (COMPLETE)
+- **Bed Interaction**: Walk onto bed to trigger save prompt
+- **Day Advancement**: Sleeping increments day counter and resets time to 6:00 AM
+- **State Persistence**: Complete game state saved to localStorage
+- **Scene Recovery**: Exterior world properly backed up during house visits
+- **Auto-Load**: Saved games automatically restore on page refresh
 
-- **Enclosed Farm Settlement**: 40x30 tile world completely surrounded by protective fencing (🔸)
-- **Forest Atmosphere**: Dense trees just inside the perimeter create a wilderness feeling
-- **Compact Farm Area**: 12x12 farmable area for focused, manageable cultivation
-- **Repositioned Water Feature**: Water (💧) moved to bottom-right corner for better layout balance
-- **Guided Pathways**: Brown dirt paths (🟫) connect key areas for natural navigation
-  - **House → Farm**: Direct path from front door to farm center
-  - **Farm → Town**: Horizontal path leading to the fence opening
-- **Fence Opening Exit**: Natural gap in right-side fencing leads to town (no walls needed)
-- **Camera System**: Follows player smoothly, clamped to world boundaries
-- **Viewport Culling**: Only renders visible tiles for performance
-- **Scene Transitions**: Seamless movement between exterior farm and interior house
+### 🏃‍♂️ Movement & Physics (COMPLETE)
+- **Smooth Pixel Movement**: 60 FPS movement with grid-to-pixel transitions
+- **Dynamic Collision**: Collision detection adapts to different world sizes
+- **Scene-Aware Navigation**: Movement constraints adjust per scene
+- **Player Facing**: Character orientation affects action targeting
+- **Camera Following**: Smooth camera tracking with boundary clamping
 
-### Advanced Crop System
+### 🎮 UI & Controls (COMPLETE)
+- **Dynamic Toolbar**: 10-slot expandable toolbar (keys 1-0) with count badges
+- **Tool Management**: Base tools + inventory items automatically populate slots
+- **Visual States**: Disabled tools, selection highlights, count indicators
+- **Time Display**: Game clock with day counter in top-right corner
+- **Debug Mode**: F3 toggle for terrain type visualization and collision boundaries
 
-#### Multiple Seed Types
-
-- **🥕 Parsnip Seeds**:
-  - Easy beginner crop requiring only 1 watering total
-  - 3 growth stages: 🌱 → 🌿 → 🌾 → 🥕
-  - Sells for 50 coins
-  - Grows quickly with minimal care
-
-- **🥔 Potato Seeds**:
-  - Advanced crop requiring 3 waterings total
-  - 4 growth stages: 🌱 → 🌿 → 🟫 → 🔸 → 🥔
-  - Sells for 80 coins (higher reward for difficulty)
-  - Requires careful water management
-
-#### Sophisticated Watering Mechanics
-
-- **Watering Tracking**: Each crop individually tracks waterings received vs required
-- **Stage-Based Requirements**: Crops must be fully watered before advancing to next growth stage
-- **Visual Feedback**: Partially watered crops show 💧 indicator
-- **Reset System**: Watering counters reset after each growth stage advance
-- **Progressive Growth**: Only fully watered crops can advance stages over time
-
-### UI & Interface Evolution
-
-#### Dynamic Toolbar System
-
-- **Individual Seed Tools**: Each seed type appears as its own tool slot
-- **Smart Tool Generation**: Toolbar dynamically generates based on current inventory
-- **Automatic Key Mapping**: Number keys (1-5+) automatically map to available tools
-- **Visual States**: Tools show count badges, disable when empty, highlight when selected
-- **Extensible Design**: Easy to add new tools/seeds that automatically get toolbar slots
-
-#### Enhanced UI Layout
-
-- **Bottom-Center Toolbar**: Large, prominent tool selection with enhanced styling
-- **Top-Right Time Panel**: Game clock (6:00 AM start) with coins display
-- **Tool Organization**: Base tools first (Hoe, Water, Harvest), then available seeds
-- **Count Badges**: Seed tools show remaining quantity with stylized counters
-- **Disabled States**: Empty seed tools gray out and become unclickable
-
-### Scene System & NPCs
-
-- **Multi-Scene World**: Three connected areas - farm exterior, house interior, and town square
-- **Walkthrough Transitions**: Automatic scene changes by walking through exit tiles (no spacebar needed)
-- **Town Square**: 30x25 town area with buildings, fountain, and cobblestone paths
-- **Improved Exit System**: Simple, intuitive entrance points
-  - **Farm → Town**: 3-tile fence opening on right edge (🌆 tiles) - walk through the gap
-  - **Town → Farm**: 3-tile exit on far left edge (🚜 tiles) - maximum separation for clarity
-- **Natural Pathways**: Brown paths lead directly to fence openings
-- **House Interior**: Smaller interior space with furniture, centered with black void background
-- **Door Interactions**: Use spacebar on doors to enter/exit house (house only)
-
-#### NPC System
-
-- **Smooth NPC Movement**: NPCs move with pixel-perfect movement similar to player
-- **Meandering AI**: Mary follows town pathways, visiting each building with natural pauses
-- **Building Visits**: Mary stops in front of each building (3+ second pauses) before continuing
-- **Pathway Navigation**: NPCs use the brown pathway system to navigate naturally
-- **Variable Movement**: Slower speed (1.5px/frame) creates relaxed, contemplative feel
-- **Dialogue System**: Interactive conversations with spacebar activation
-- **Mary Character**: Friendly town resident (👩‍🌾) with location-aware dialogue
-- **Interaction Range**: Walk within 1.5 tiles of NPCs to interact
-- **Modal Dialogue**: Full-screen dialogue boxes with NPC portraits and continue prompts
-
-### Time Management
-
-- **Game Clock**: Starts at 6:00 AM, advances 10 minutes every 5 seconds real-time
-- **12-Hour Format**: Displays with AM/PM for natural time reading
-- **Growth Timing**: Crops grow based on game time intervals (3 seconds per stage when watered)
-- **Visual Integration**: Clock prominently displayed with enhanced padding
+### 👥 NPC System (COMPLETE)
+- **Smooth NPC Movement**: Pixel-perfect pathfinding along predefined routes
+- **Interactive Dialogue**: Spacebar interactions with modal dialogue system
+- **Scene-Aware**: NPCs exist in specific scenes with location-based dialogue
+- **Pathfinding**: Mary NPC visits all town buildings with natural pauses
+- **Atmospheric AI**: Meandering movement creates living world feeling
 
 ## Technical Architecture
 
-### Enhanced File Structure
+### 📁 Cleaned & Refactored Codebase
+- **Modular World Generation**: Large functions broken into focused helpers
+- **Organized File Structure**: Clear separation of concerns across lib files
+- **Helper Functions**: `worldHelpers.ts` contains reusable world generation utilities
+- **Type Safety**: Comprehensive TypeScript interfaces for all game systems
+- **Performance Optimized**: Efficient collision detection and render culling
 
+### 🗂️ File Organization
 ```
 /lib/
-  constants.ts    - Game configuration, base tools, timing constants
-  types.ts        - Advanced TypeScript interfaces with seed/crop types
-  world.ts        - World generation and house interior creation
-  collision.ts    - Collision detection with door collision support
-  gameLogic.ts    - Core farming mechanics with multi-seed support
-  seeds.ts        - Seed configuration system and crop display logic
-  toolbar.ts      - Dynamic toolbar generation system
+  constants.ts     - Game configuration and balance constants
+  types.ts         - TypeScript interfaces for all game systems
+  world.ts         - Main world generation with modular approach
+  worldHelpers.ts  - Reusable world generation utilities
+  gameLogic.ts     - Core game mechanics and action handling
+  collision.ts     - Collision detection with dynamic world sizing
+  seeds.ts         - Seed configuration and crop display logic
+  toolbar.ts       - Dynamic toolbar generation system
+  npcs.ts          - NPC behavior and dialogue management
+  saveSystem.ts    - Complete save/load functionality
+  horror.ts        - Horror event system (foundation)
 
 /hooks/
-  useGameLoop.ts  - Movement, camera, and advanced crop growth loops
-  useInput.ts     - Dynamic keyboard input with toolbar-aware shortcuts
-  useGameTime.ts  - Game clock system with 10-minute increments
+  useGameLoop.ts   - Main game loops (movement, NPCs, crops, stamina)
+  useInput.ts      - Keyboard input handling with dynamic tool selection
+  useGameTime.ts   - Game clock progression system
 
 /components/
-  GameWorld.tsx   - World rendering with interior/exterior scene support
-  GameUI.tsx      - Advanced UI with dynamic toolbar and time display
-
-pages/index.tsx   - Main game orchestration with enhanced state management
+  GameWorld.tsx    - World rendering with scene management
+  GameUI.tsx       - UI overlay with toolbar and debug info
+  StaminaBar.tsx   - Stamina visualization with color coding
+  SaveDialog.tsx   - Sleep/save interaction modal
+  HorrorOverlay.tsx - Horror event visual effects
 ```
 
-### Advanced Systems
+### 📚 Documentation System
+- **`docs/WORLD_SYSTEM.md`**: Complete world generation documentation
+- **`docs/FARMING_SYSTEM.md`**: Farming mechanics and crop system guide
+- **`docs/STAMINA_SYSTEM.md`**: Stamina management and balance documentation
+- **Code Comments**: Comprehensive inline documentation for complex systems
 
-- **Dynamic Tool Management**: Tools auto-generate based on inventory state
-- **Multi-Stage Crop Growth**: Complex watering requirements and growth validation
-- **Scene Management**: Proper interior/exterior world state handling
-- **Time Progression**: Integrated clock system affecting game mechanics
+## Current Scene Layout
 
-## Current Toolbar Layout (Dynamic)
+### 🚜 Exterior Farm
+- **40x30 world** with perimeter forest atmosphere
+- **⚔️ Arena Exit** (left): 3-tile opening to combat arena
+- **🌆 Town Exit** (right): 3-tile opening to town square  
+- **12x12 Farm Area**: Central farmable land with brown path connections
+- **Player House**: 3x4 structure with spacebar door interaction
+- **Decorative Elements**: Water feature, scattered trees, protective fencing
 
-1. 🔨 **Hoe** (Key: 1) - Till farmable soil
-2. 💧 **Water** (Key: 2) - Water planted crops (progressive system)
-3. ✋ **Harvest** (Key: 3) - Collect mature crops for coins
-4. 🥕 **Parsnip Seeds** (Key: 4) - Plant easy-growing parsnips (5 starting)
-5. 🥔 **Potato Seeds** (Key: 5) - Plant advanced potatoes (3 starting)
+### ⚔️ Arena (NEW!)
+- **20x15 combat space** with stone floor and perimeter walls
+- **Corner Braziers**: Atmospheric torch decorations using forge emojis
+- **🚜 Return Exit** (right): 3-tile return to exterior farm
+- **Combat Ready**: Designed for future combat system implementation
 
-_Note: Toolbar automatically adjusts when seeds run out or new types are added_
+### 🏘️ Town Square  
+- **30x25 central hub** with cobblestone paths and fountain centerpiece
+- **General Store**: Shopping interface with shelves and counter
+- **Blacksmith**: Forge interaction and anvil for crafting
+- **Cozy House**: Mary's home with kitchen and living areas
+- **🚜 Farm Exit** (left): Return path to exterior farm
 
-## Recent Major Updates
+### 🏠 House Interior
+- **12x8 personal space** with furniture and bed interaction
+- **🛏️ Sleep System**: Walk onto bed to trigger save/day advancement
+- **Storage & Decor**: Table, chest, and homey atmosphere
+- **🚪 Exit Door**: Spacebar interaction to return to exterior
 
-### Individual Seed Tool System
+## Ready for Combat Implementation
 
-Completely redesigned the planting system:
+### ✅ Prerequisites Complete
+- **Arena Scene**: Dedicated combat space with appropriate atmosphere
+- **Scene Transitions**: Seamless arena access via left-side farm exit
+- **Stamina System**: Energy management perfect for combat costs
+- **Physics System**: Item drops ready for loot/reward mechanics
+- **UI Framework**: Toolbar system can accommodate combat tools/abilities
+- **Save System**: Progress persistence supports combat consequences
 
-- **Removed Generic "Seeds" Tool**: No more universal planting tool
-- **Individual Seed Selection**: Each seed type is now its own selectable tool
-- **Direct Planting**: Select parsnip tool → plant parsnips, select potato tool → plant potatoes
-- **Inventory-Based Availability**: Seeds only appear as tools when you have them
-- **Future-Ready Architecture**: Built for planned user-customizable toolbar organization
-
-### Advanced Watering Requirements
-
-- **Parsnips**: Simple 1-watering system for beginners
-- **Potatoes**: Complex 3-watering system requiring planning and resource management
-- **Progressive Growth**: Crops won't advance until watering requirements are met
-- **Visual Feedback**: Clear indicators for watering progress and completion
-
-### Enhanced User Experience
-
-- **Larger UI Elements**: More prominent toolbar and time display
-- **Better Visual Hierarchy**: Clear separation between tools and inventory
-- **Intuitive Controls**: Direct tool selection without multi-step processes
-- **Professional Styling**: Enhanced borders, shadows, and hover effects
+### 🎯 Combat System Foundation
+- **Scene Isolation**: Arena provides contained space for combat encounters
+- **Resource Management**: Stamina system naturally limits combat activities
+- **Reward Integration**: Physics-based drops work for combat loot
+- **Tool Expansion**: Existing toolbar accommodates weapons/combat items
+- **State Persistence**: Save system preserves combat-related progress
 
 ## Development Philosophy
 
-### Code Quality & Architecture
+### 🧹 Code Quality Focus
+- **Modular Architecture**: Systems designed for easy expansion and testing
+- **Type Safety**: Comprehensive TypeScript prevents runtime errors  
+- **Performance Conscious**: Efficient algorithms and memory management
+- **Documentation Driven**: Extensive docs support future development
+- **Refactoring Priority**: Clean, maintainable code over quick implementations
 
-- **TypeScript-First**: Comprehensive type safety prevents runtime errors
-- **Modular Design**: Clean separation enables easy feature addition
-- **Performance-Conscious**: Efficient rendering and state management
-- **Extensible Foundation**: Built to support complex future features
-
-### User Experience Focus
-
-- **Intuitive Controls**: Direct tool selection mirrors professional game UX
+### 🎮 Player Experience Design
+- **Progressive Complexity**: Systems start simple, add depth gradually
 - **Visual Clarity**: Clear feedback for all game states and interactions
-- **Progressive Complexity**: Simple parsnips introduce farming, potatoes add depth
-- **Responsive Design**: Toolbar and UI adapt to different screen sizes
+- **Intuitive Controls**: Direct tool selection and natural navigation
+- **Strategic Depth**: Meaningful choices in stamina, crops, and time management
+- **Quality of Life**: Magnetic collection, auto-save prompts, smart UI
 
-### Future Roadmap Preparation
-
-- **Horror Integration Ready**: Architecture supports gradual suspense introduction
-- **Customizable Toolbar**: Foundation laid for drag-and-drop tool organization
-- **Expandable Crop System**: Easy configuration for unlimited seed varieties
-- **Advanced Mechanics**: Framework ready for seasons, weather, NPCs
-
-## Technical Debt & Considerations
-
-- **Performance**: Consider virtualization for very large farms
-- **Save System**: Architecture ready for persistent game state
-- **Mobile Adaptation**: Touch controls could be added to existing input system
-- **Accessibility**: Consider adding screen reader support and keyboard navigation hints
+### 🔮 Horror Integration Readiness
+- **Atmospheric Foundation**: Dark themes, isolated settings, mysterious elements
+- **System Flexibility**: All core systems designed to support horror mechanics
+- **Gradual Introduction**: Architecture supports subtle horror element integration
+- **Player Psychology**: Stamina pressure and time management create natural tension
 
 ## Getting Started
 
@@ -214,20 +180,19 @@ npm install
 npm run dev
 ```
 
-Game runs at `http://localhost:3000` with full-screen farming experience.
-
-### Controls
-
-- **WASD/Arrow Keys**: Move player
-- **Spacebar**: Use selected tool or interact with doors
-- **1-5**: Select tools (Hoe, Water, Harvest, Parsnip Seeds, Potato Seeds)
+**Controls:**
+- **WASD/Arrow Keys**: Player movement
+- **Spacebar**: Use selected tool / Interact with doors/NPCs  
+- **1-0**: Select tools from toolbar
 - **F3**: Toggle debug mode
-- **Click**: Select tools from toolbar
 
-### Gameplay Tips
+**Game Flow:**
+1. **Farm**: Plant seeds, water crops, harvest for coins
+2. **Explore**: Visit town, talk to NPCs, discover new areas
+3. **Manage**: Balance stamina between activities and time pressure
+4. **Save**: Sleep in bed to save progress and advance to next day
+5. **Combat**: Enter arena (left exit) when combat system is implemented
 
-- Start with parsnips (easy 1-watering system)
-- Progress to potatoes for higher profits (3-watering requirement)
-- Water crops multiple times before they'll grow to next stage
-- Enter house via spacebar on front door
-- Debug mode shows collision boundaries and watering progress
+## Next: Combat System Implementation
+
+The codebase is now clean, well-documented, and ready for combat system development. All foundational systems are complete and tested, providing a solid base for adding combat mechanics to the dedicated arena space.

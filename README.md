@@ -1,163 +1,165 @@
-# 🌙 Night Farming
+# 🌾 Night Farming
 
-A browser-based farming simulation game inspired by Stardew Valley, built with Next.js, React, and TypeScript. Night Farming serves as a prototype for a future horror-themed farming experience, but currently focuses on delivering smooth, engaging farming gameplay mechanics.
+A browser-based farming simulation game with a mysterious twist, built with Next.js, React, TypeScript, and Tailwind CSS.
 
-![Night Farming Screenshot](https://img.shields.io/badge/Status-Prototype-orange) ![Next.js](https://img.shields.io/badge/Next.js-15.4.6-black) ![React](https://img.shields.io/badge/React-19.1.0-blue) ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
+![Night Farming Screenshot](https://img.shields.io/badge/Status-Ready_for_Combat-green) ![Next.js](https://img.shields.io/badge/Next.js-15.4.6-black) ![React](https://img.shields.io/badge/React-19.1.0-blue) ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
 
 ## 🎮 Game Features
 
-### Core Gameplay
+### 🚜 Advanced Farming System
+- **Multiple Crop Types**: Parsnips (easy) and Potatoes (challenging) with unique watering requirements
+- **Progressive Growth**: Crops advance through visual growth stages when properly watered
+- **Economic Strategy**: Balance crop difficulty vs profit margins for optimal farming
 
-- **Smooth pixel-based movement** - No grid snapping, 60 FPS responsive controls
-- **Complete farming cycle** - Till soil, plant seeds, water crops, harvest for profit
-- **Target-ahead actions** - Tools affect the tile you're facing, not standing on
-- **Real-time crop growth** - Watch your parsnips grow automatically when watered
-- **Economic system** - Earn coins from harvested crops to buy more seeds
+### ⚡ Stamina Management
+- **Daily Energy Resource**: 100 stamina depletes through actions and time passage
+- **Strategic Planning**: Choose activities carefully as stamina limits daily actions
+- **Sleep to Restore**: Only sleeping in your bed restores stamina and advances days
 
-### World & Exploration
+### 🌍 Multi-Scene World
+- **Exterior Farm**: 40x30 main world with house, water features, and farming area
+- **Town Square**: Visit NPCs, shop at the general store, explore the blacksmith
+- **Combat Arena**: Dedicated arena space for future combat encounters
+- **House Interior**: Your personal space with bed for saving and furniture
 
-- **30x20 game world** with house, pond, trees, and farmable areas
-- **Dynamic camera system** - Smoothly follows player with intelligent boundaries
-- **Collision detection** - Can't walk through walls, water, or trees
-- **Full-screen gameplay** - Adapts to any browser window size
+### 🎒 Physics-Based Items
+- **Realistic Item Drops**: Harvested crops and chopped wood "pop out" with physics
+- **Magnetic Collection**: Items attract to player when nearby with pickup delays
+- **Dynamic Inventory**: 10-slot toolbar expands with collected items
 
-### Tools & Inventory
+### 💾 Save System
+- **Sleep to Save**: Walk onto your bed to save progress and advance to the next day
+- **Persistent State**: Game state preserved in browser storage
+- **Day Progression**: Time resets to 6:00 AM each morning with full stamina
 
-- **4 farming tools**: Hoe, Seeds, Watering Can, Harvest Hand
-- **Inventory management** - Track seeds, crops, and coins
-- **Quick tool switching** - Use number keys 1-4 for instant tool selection
+## 🕹️ Controls
 
-### Debug & Development
+| Control | Action |
+|---------|--------|
+| **WASD / Arrow Keys** | Move player |
+| **Spacebar** | Use selected tool / Interact |
+| **1-9, 0** | Select toolbar tools |
+| **F3** | Toggle debug mode |
 
-- **F3 debug mode** - Visual collision boundaries and real-time player data
-- **Color-coded terrain** - Red walls, blue water, brown trees for easy identification
-- **Performance optimized** - Efficient rendering and collision detection
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-- Node.js 18+
-- npm, yarn, pnpm, or bun
-
-### Installation & Running
+## 🏗️ Installation & Development
 
 ```bash
-# Clone the repository
-git clone <repository-url>
-cd night-farming
-
 # Install dependencies
 npm install
 
-# Start development server
+# Run development server
 npm run dev
+
+# Build for production  
+npm run build
+
+# Start production server
+npm start
 ```
 
 Open [http://localhost:3000](http://localhost:3000) to play the game.
 
-### Build for Production
+## 🛠️ Technology Stack
 
-```bash
-npm run build
-npm run start
+- **Framework**: Next.js 15 with App Router
+- **Language**: TypeScript for type safety
+- **Styling**: Tailwind CSS for responsive design
+- **State Management**: React hooks and localStorage
+- **Animation**: Custom game loops at 60 FPS
+
+## 📁 Project Structure
+
+```
+├── components/          # React components
+│   ├── GameWorld.tsx   # Main game rendering
+│   ├── GameUI.tsx      # User interface overlay
+│   └── StaminaBar.tsx  # Stamina visualization
+├── hooks/              # Custom React hooks
+│   ├── useGameLoop.ts  # Core game loops
+│   ├── useInput.ts     # Input handling
+│   └── useGameTime.ts  # Time management
+├── lib/                # Game logic and utilities
+│   ├── world.ts        # World generation
+│   ├── gameLogic.ts    # Core game mechanics
+│   ├── types.ts        # TypeScript interfaces
+│   └── constants.ts    # Game configuration
+├── docs/               # Detailed documentation
+│   ├── WORLD_SYSTEM.md # World generation guide
+│   ├── FARMING_SYSTEM.md # Farming mechanics
+│   └── STAMINA_SYSTEM.md # Stamina management
+└── pages/              # Next.js pages
+    └── index.tsx       # Main game page
 ```
 
-## 🎮 How to Play
+## 🎯 Gameplay Guide
 
-### Controls
+### Getting Started
+1. **Learn Farming**: Start with parsnips (easy 1-watering crop)
+2. **Manage Stamina**: Watch your energy bar and plan activities
+3. **Explore World**: Use exits to visit town and discover new areas
+4. **Save Progress**: Sleep in your bed when ready to advance days
 
-- **WASD** or **Arrow Keys** - Move your farmer around the world
-- **Spacebar** - Use your selected tool on the tile in front of you
-- **1-4** - Select tools (Hoe, Seeds, Watering Can, Harvest Hand)
-- **F3** - Toggle debug mode to see collision boundaries
+### Farming Tips
+- **Parsnips**: Beginner-friendly, only need 1 watering, sell for 50 coins
+- **Potatoes**: Advanced crop, need 3 waterings, sell for 80 coins  
+- **Growth Stages**: Crops show visual progress, only advance when fully watered
+- **Tool Selection**: Each seed type has its own toolbar tool
 
-### Farming Process
+### Stamina Strategy
+- **Action Costs**: Most farming activities cost 1 stamina, tree chopping costs 3
+- **Time Pressure**: Stamina slowly decreases over time (0.1 per 5 seconds)
+- **Daily Planning**: ~70-80 farming actions possible per day
+- **Rest Timing**: Sleep strategically to maximize daily productivity
 
-1. **Till the soil** - Use the Hoe (1) on brown farmable dirt
-2. **Plant seeds** - Use Seeds (2) on tilled soil
-3. **Water crops** - Use Watering Can (3) on planted seeds
-4. **Wait & watch** - Crops grow automatically every 3 seconds when watered
-5. **Harvest** - Use Harvest Hand (4) on fully grown crops for 50 coins each
+## 🔧 Development Features
 
-### World Layout
+### Debug Mode (F3)
+- View terrain types for each tile
+- See collision boundaries and invalid areas
+- Monitor crop watering progress
+- Display player coordinates and game state
 
-- **Brown soil area** - The only place you can farm (center of map)
-- **House** - Explore the structure in the top-left (walls block movement)
-- **Pond** - Water feature on the right side (can't walk on water)
-- **Trees** - Scattered around edges (impassable natural boundaries)
-- **Grass** - Open areas you can walk through freely
+### Performance
+- **Viewport Culling**: Only renders visible game tiles
+- **Optimized Collision**: Dynamic collision detection based on actual world size
+- **Efficient State**: Minimal re-renders with proper React optimization
 
-## 🛠️ Technical Details
+## 📚 Documentation
 
-### Built With
+Detailed system documentation available in the `/docs` folder:
 
-- **Next.js 15.4.6** - React framework with SSR support
-- **React 19.1.0** - UI library with hooks-based state management
-- **TypeScript 5** - Type safety and better development experience
-- **Tailwind CSS 4** - Utility-first CSS framework for styling
+- **[World System](docs/WORLD_SYSTEM.md)**: World generation, scenes, and navigation
+- **[Farming System](docs/FARMING_SYSTEM.md)**: Crops, growth mechanics, and economics  
+- **[Stamina System](docs/STAMINA_SYSTEM.md)**: Energy management and daily planning
 
-### Architecture Highlights
+## 🛣️ Roadmap
 
-- **60 FPS game loop** using `setInterval` for smooth movement
-- **Pixel-perfect collision detection** with grid-based terrain checking
-- **Dynamic viewport rendering** - only renders visible tiles for performance
-- **SSR-compatible** - Proper handling of browser-only features like `window`
-- **Modular game systems** - Separate concerns for movement, camera, collision, farming
+### ✅ Completed Features
+- Advanced farming system with multiple crop types
+- Physics-based item collection with magnetic attraction
+- Multi-scene world with seamless transitions  
+- Stamina management with daily resource cycles
+- Complete save/load system with day progression
+- NPC interactions and dialogue system
+- Combat arena preparation
 
-### Performance Features
-
-- **Viewport culling** - Only renders tiles visible on screen plus buffer
-- **Optimized collision checking** - Early bounds checking and efficient grid lookups
-- **Smooth camera interpolation** - Reduces jarring movements during gameplay
-- **Dynamic tile calculation** - Adapts render area to any screen size
-
-## 🗺️ Development Roadmap
-
-### Immediate Features
-
-- [ ] Multiple crop types with different growth rates
-- [ ] Tool durability and upgrade system
-- [ ] Day/night cycle with visual changes
-- [ ] Save/load game functionality
-- [ ] Sound effects and background music
-
-### Future Horror Elements
-
-The game is designed to gradually introduce horror elements:
-
-- [ ] Mysterious crop failures during certain nights
-- [ ] Strange sounds and visual anomalies
-- [ ] Unexplained changes to farm layout
-- [ ] Supernatural encounters that escalate over time
-
-### Long-term Goals
-
-- [ ] NPC characters and dialogue system
-- [ ] Multiple farm areas to unlock and explore
-- [ ] Seasonal weather and environmental effects
-- [ ] Market system with fluctuating crop prices
-- [ ] Multiplayer farming cooperation
-
-## 📝 Documentation
-
-- **[CLAUDE.md](CLAUDE.md)** - Detailed development log and technical implementation notes
-- **Game Design** - Core farming mechanics inspired by Stardew Valley
-- **Code Structure** - Single-file React component with TypeScript interfaces
+### 🚧 Upcoming Features
+- **Combat System**: Turn-based or real-time combat in the dedicated arena
+- **Horror Elements**: Gradual introduction of mysterious and suspenseful elements
+- **Advanced NPCs**: More characters with deeper storylines and quests
+- **Crafting System**: Use collected resources to create tools and items
+- **Weather System**: Dynamic weather affecting crop growth and gameplay
 
 ## 🤝 Contributing
 
-This is currently a prototype project. Contributions, ideas, and feedback are welcome! Please feel free to:
-
-- Report bugs or gameplay issues
-- Suggest new features or improvements
-- Submit pull requests with enhancements
-- Share ideas for horror elements to add later
+This is a personal project, but feedback and suggestions are welcome! The codebase is designed with clean architecture and comprehensive documentation to support future development.
 
 ## 📄 License
 
-This project is open source. Please check the license file for details.
+This project is for educational and entertainment purposes. Feel free to learn from the code and techniques used.
 
 ---
 
-**Night Farming** - Where peaceful farming meets the unknown. Start with simple crops, but stay alert... the night brings more than just darkness to your farm. 🌾🌙
+**Happy Farming! 🌱**
+
+*Watch out for things that go bump in the night...* 👻
