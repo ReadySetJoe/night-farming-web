@@ -32,27 +32,48 @@ export const createWorld = (): TerrainType[][] => {
     }
   }
 
-  // Create perimeter fence around entire external scene
+  // Create perimeter trees around entire external scene for forest atmosphere
   for (let x = 0; x < WORLD_WIDTH; x++) {
-    world[0][x] = "fence"; // Top edge
-    world[WORLD_HEIGHT - 1][x] = "fence"; // Bottom edge
+    world[0][x] = "tree"; // Top edge
+    world[WORLD_HEIGHT - 1][x] = "tree"; // Bottom edge
   }
   for (let y = 0; y < WORLD_HEIGHT; y++) {
-    world[y][0] = "fence"; // Left edge
-    world[y][WORLD_WIDTH - 1] = "fence"; // Right edge
+    world[y][0] = "tree"; // Left edge
+    world[y][WORLD_WIDTH - 1] = "tree"; // Right edge
   }
 
-  // Add trees just inside the fence perimeter for forest atmosphere
-  const treePositions = [
-    // Inner perimeter trees (with path to city exit cleared)
+  // Create arena exit first (before placing fence)
+  const arenaExitY = Math.floor(WORLD_HEIGHT / 2); // Same height as town exit
+  const arenaExitX = 1; // One tile inside from the tree perimeter on left side
+  console.log(`Arena exit coordinates: Y=${arenaExitY}, X=${arenaExitX}`);
+
+  // Create 3-tile opening in the fence for arena access
+  world[arenaExitY - 1][arenaExitX] = "exit_to_arena"; // Top exit tile
+  world[arenaExitY][arenaExitX] = "exit_to_arena"; // Middle exit tile
+  world[arenaExitY + 1][arenaExitX] = "exit_to_arena"; // Bottom exit tile
+
+  // Also clear the tree perimeter at arena exit location
+  world[arenaExitY - 1][0] = "exit_to_arena"; // Top outer exit
+  world[arenaExitY][0] = "exit_to_arena"; // Middle outer exit  
+  world[arenaExitY + 1][0] = "exit_to_arena"; // Bottom outer exit
+
+  // Clear fence positions in front of arena entrance
+  console.log(`Clearing fence at positions: Y=${arenaExitY-1}, X=${arenaExitX+1} | Y=${arenaExitY}, X=${arenaExitX+1} | Y=${arenaExitY+1}, X=${arenaExitX+1}`);
+  world[arenaExitY - 1][arenaExitX + 1] = "grass"; // Top inner - clear fence
+  world[arenaExitY][arenaExitX + 1] = "grass"; // Middle inner - clear fence
+  world[arenaExitY + 1][arenaExitX + 1] = "grass"; // Bottom inner - clear fence
+
+  // Add fence just inside the tree perimeter to block access to forest
+  // Skip fence positions where arena exit is located
+  const fencePositions = [
+    // Inner perimeter fence (with gaps for both exits cleared)
     [1, 1],
     [1, 3],
     [1, 5],
     [1, 7],
     [1, 9],
     [1, 11],
-    [1, 13],
-    [1, 15],
+    // Skip [1, 13], [1, 14], [1, 15] for arena exit
     [1, 17],
     [1, 19],
     [1, 21],
@@ -101,9 +122,10 @@ export const createWorld = (): TerrainType[][] => {
     [13, 1],
     [13, 37],
     [13, 38],
-    [14, 1],
-    [15, 1],
-    [16, 1],
+    // Skip [14, 1], [15, 1], [16, 1] for arena exit tiles
+    // Skip [14, 2] for arena entrance clearance
+    // Skip [15, 2] for arena entrance clearance  
+    // Skip [16, 2] for arena entrance clearance
     [17, 1],
     [17, 37],
     [17, 38],
@@ -157,7 +179,24 @@ export const createWorld = (): TerrainType[][] => {
     [28, 35],
     [28, 37],
     [28, 38],
-    // Some scattered interior trees for atmosphere (avoiding path area)
+  ];
+
+  fencePositions.forEach(([y, x]) => {
+    if (y >= 0 && y < WORLD_HEIGHT && x >= 0 && x < WORLD_WIDTH) {
+      // Debug: Check if we're placing fence at arena entrance
+      if (x === 2 && (y === arenaExitY - 1 || y === arenaExitY || y === arenaExitY + 1)) {
+        console.log(`WARNING: Placing fence at arena entrance position: Y=${y}, X=${x}`);
+      }
+      // Debug: Log fence positions near arena entrance
+      if (x <= 3 && y >= 13 && y <= 17) {
+        console.log(`Placing fence at: Y=${y}, X=${x}`);
+      }
+      world[y][x] = "fence";
+    }
+  });
+
+  // Add some scattered interior trees for atmosphere (avoiding path and farm areas)
+  const interiorTreePositions = [
     [5, 10],
     [5, 30],
     [8, 15],
@@ -171,7 +210,7 @@ export const createWorld = (): TerrainType[][] => {
     [24, 22],
   ];
 
-  treePositions.forEach(([y, x]) => {
+  interiorTreePositions.forEach(([y, x]) => {
     if (y >= 0 && y < WORLD_HEIGHT && x >= 0 && x < WORLD_WIDTH) {
       world[y][x] = "tree";
     }
@@ -206,26 +245,47 @@ export const createWorld = (): TerrainType[][] => {
 
   // Create fence opening on right side for town exit
   const exitY = Math.floor(WORLD_HEIGHT / 2); // Middle of world height
-  const exitX = WORLD_WIDTH - 1; // Right edge
+  const exitX = WORLD_WIDTH - 1; // At the edge of the world
 
-  // Create 3-tile opening in the fence
+  // Create 3-tile opening at the edge for town access
   world[exitY - 1][exitX] = "exit_to_town"; // Top exit tile
   world[exitY][exitX] = "exit_to_town"; // Middle exit tile
   world[exitY + 1][exitX] = "exit_to_town"; // Bottom exit tile
 
-  // Path from farm to the fence opening
+  // Clear the fence at exit location to make room for path
+  world[exitY - 1][WORLD_WIDTH - 2] = "grass"; // Top inner - clear fence
+  world[exitY][WORLD_WIDTH - 2] = "grass"; // Middle inner - clear fence
+  world[exitY + 1][WORLD_WIDTH - 2] = "grass"; // Bottom inner - clear fence
+
+
+  // Path from farm to the town exit (right side)
   // Also clear a wider corridor around the main path for easier navigation
-  for (let x = FARM_START_X + FARM_SIZE; x < exitX; x++) {
+  for (let x = FARM_START_X + FARM_SIZE; x <= exitX; x++) {
     // Clear the main path line
     if (world[exitY][x] !== "water") {
       world[exitY][x] = "path";
     }
     // Clear one tile above and below the path for easier movement
-    if (exitY - 1 >= 0 && world[exitY - 1][x] === "tree") {
+    if (exitY - 1 >= 0 && (world[exitY - 1][x] === "tree" || world[exitY - 1][x] === "fence")) {
       world[exitY - 1][x] = "grass";
     }
-    if (exitY + 1 < WORLD_HEIGHT && world[exitY + 1][x] === "tree") {
+    if (exitY + 1 < WORLD_HEIGHT && (world[exitY + 1][x] === "tree" || world[exitY + 1][x] === "fence")) {
       world[exitY + 1][x] = "grass";
+    }
+  }
+
+  // Path from farm to the arena exit (left side)
+  for (let x = arenaExitX + 1; x < FARM_START_X; x++) {
+    // Clear the main path line
+    if (world[arenaExitY][x] !== "water") {
+      world[arenaExitY][x] = "path";
+    }
+    // Clear one tile above and below the path for easier movement
+    if (arenaExitY - 1 >= 0 && (world[arenaExitY - 1][x] === "tree" || world[arenaExitY - 1][x] === "fence")) {
+      world[arenaExitY - 1][x] = "grass";
+    }
+    if (arenaExitY + 1 < WORLD_HEIGHT && (world[arenaExitY + 1][x] === "tree" || world[arenaExitY + 1][x] === "fence")) {
+      world[arenaExitY + 1][x] = "grass";
     }
   }
 
@@ -551,4 +611,41 @@ export const createCozyHouseInterior = (): TerrainType[][] => {
   cozyHouse[7][9] = "furniture_chest";
 
   return cozyHouse;
+};
+
+export const createArena = (): TerrainType[][] => {
+  // Create a small arena (20x15)
+  const ARENA_WIDTH = 20;
+  const ARENA_HEIGHT = 15;
+
+  const arena = Array(ARENA_HEIGHT)
+    .fill(null)
+    .map(() => Array(ARENA_WIDTH).fill("stone_path")); // Stone floor for arena
+
+  // Add arena walls around the perimeter
+  for (let y = 0; y < ARENA_HEIGHT; y++) {
+    for (let x = 0; x < ARENA_WIDTH; x++) {
+      if (y === 0 || y === ARENA_HEIGHT - 1 || x === 0 || x === ARENA_WIDTH - 1) {
+        arena[y][x] = "stone_wall";
+      }
+    }
+  }
+
+  // Create entrance on the right side (leading back to farm)
+  const entranceY = Math.floor(ARENA_HEIGHT / 2);
+  const entranceX = ARENA_WIDTH - 1;
+  
+  // Create 3-tile entrance
+  arena[entranceY - 1][entranceX] = "exit_to_farm";
+  arena[entranceY][entranceX] = "exit_to_farm";  
+  arena[entranceY + 1][entranceX] = "exit_to_farm";
+
+  // Add some decorative elements
+  // Corner torches/braziers (using forge emoji for now)
+  arena[2][2] = "forge";
+  arena[2][ARENA_WIDTH - 3] = "forge";
+  arena[ARENA_HEIGHT - 3][2] = "forge";
+  arena[ARENA_HEIGHT - 3][ARENA_WIDTH - 3] = "forge";
+
+  return arena;
 };

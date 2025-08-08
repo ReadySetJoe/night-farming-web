@@ -18,6 +18,9 @@ export interface Player {
   pixelY: number;
   facing: "up" | "down" | "left" | "right";
   isMoving: boolean;
+  stamina: number;
+  maxStamina: number;
+  isResting: boolean;
 }
 
 export interface Camera {
@@ -60,7 +63,8 @@ export interface NPC {
     | "town_square"
     | "general_store"
     | "blacksmith"
-    | "cozy_house";
+    | "cozy_house"
+    | "arena";
   pauseTimer: number;
   isPaused: boolean;
 }
@@ -86,7 +90,8 @@ export interface GameState {
     | "town_square"
     | "general_store"
     | "blacksmith"
-    | "cozy_house";
+    | "cozy_house"
+    | "arena";
   gameTime: {
     hours: number;
     minutes: number;

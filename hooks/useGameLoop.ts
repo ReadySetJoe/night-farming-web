@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { GameState, KeyState } from "../lib/types";
 import { checkCollision, isSolid } from "../lib/collision";
-import { createWorld, createTownSquare } from "../lib/world";
+import { createWorld, createTownSquare, createArena } from "../lib/world";
 import { getNPCFacing } from "../lib/npcs";
 import { isHorrorEventActive } from "../lib/horror";
 import { updateDroppedItems } from "../lib/gameLogic";
@@ -13,6 +13,8 @@ import {
   CAMERA_MOVE_SPEED,
   FPS,
   CROP_GROWTH_INTERVAL,
+  STAMINA_DECAY_RATE,
+  STAMINA_DECAY_INTERVAL,
 } from "../lib/constants";
 
 export const useGameLoop = (
@@ -161,6 +163,59 @@ export const useGameLoop = (
             },
             camera: {
               x: (farmEntranceX - 1) * CELL_SIZE,
+              y: farmEntranceY * CELL_SIZE,
+            },
+          };
+        }
+
+        // Handle arena transitions
+        if (
+          currentTile === "exit_to_arena" &&
+          prev.currentScene === "exterior"
+        ) {
+          const arenaWorld = createArena();
+          const arenaEntranceX = arenaWorld[0].length - 2; // One tile inside from the right edge
+          const arenaEntranceY = Math.floor(arenaWorld.length / 2);
+
+          return {
+            ...prev,
+            currentScene: "arena",
+            world: arenaWorld,
+            player: {
+              ...newPlayer,
+              x: arenaEntranceX,
+              y: arenaEntranceY,
+              pixelX: arenaEntranceX * CELL_SIZE,
+              pixelY: arenaEntranceY * CELL_SIZE,
+            },
+            camera: {
+              x: arenaEntranceX * CELL_SIZE,
+              y: arenaEntranceY * CELL_SIZE,
+            },
+          };
+        }
+
+        if (
+          currentTile === "exit_to_farm" &&
+          prev.currentScene === "arena"
+        ) {
+          const exteriorWorld = createWorld();
+          const farmEntranceX = 1; // One tile inside from the left edge
+          const farmEntranceY = Math.floor(WORLD_HEIGHT / 2);
+
+          return {
+            ...prev,
+            currentScene: "exterior",
+            world: exteriorWorld,
+            player: {
+              ...newPlayer,
+              x: farmEntranceX + 1, // Enter one tile to the right of entrance
+              y: farmEntranceY,
+              pixelX: (farmEntranceX + 1) * CELL_SIZE,
+              pixelY: farmEntranceY * CELL_SIZE,
+            },
+            camera: {
+              x: (farmEntranceX + 1) * CELL_SIZE,
               y: farmEntranceY * CELL_SIZE,
             },
           };
@@ -359,5 +414,29 @@ export const useGameLoop = (
     }, 100);
 
     return () => clearInterval(horrorInterval);
+  }, [setGameState]);
+
+  // Gradual stamina depletion over time
+  useEffect(() => {
+    const staminaInterval = setInterval(() => {
+      setGameState(prev => {
+        // Gradually reduce stamina over time
+        if (prev.player.stamina > 0) {
+          const newStamina = Math.max(0, prev.player.stamina - STAMINA_DECAY_RATE);
+          
+          return {
+            ...prev,
+            player: {
+              ...prev.player,
+              stamina: newStamina,
+            },
+          };
+        }
+        
+        return prev;
+      });
+    }, STAMINA_DECAY_INTERVAL);
+
+    return () => clearInterval(staminaInterval);
   }, [setGameState]);
 };

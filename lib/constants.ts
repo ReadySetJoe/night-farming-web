@@ -27,6 +27,18 @@ export const STARTING_PARSNIP_SEEDS = 5;
 export const STARTING_POTATO_SEEDS = 3;
 export const STARTING_WOOD = 0;
 
+// Stamina
+export const MAX_STAMINA = 100;
+export const STAMINA_COSTS = {
+  HOE: 1,
+  PLANT: 1,
+  WATER: 1,
+  HARVEST: 1,
+  CHOP: 3,
+} as const;
+export const STAMINA_DECAY_RATE = 0.1; // Gradual stamina loss per tick
+export const STAMINA_DECAY_INTERVAL = 5000; // 5 seconds between decay ticks
+
 // Tree chopping
 export const TREE_MAX_HEALTH = 3;
 export const WOOD_DROP_COUNT = 3;

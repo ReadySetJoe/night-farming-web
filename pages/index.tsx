@@ -14,7 +14,13 @@ import { GameWorld } from "../components/GameWorld";
 import { GameUI } from "../components/GameUI";
 import { HorrorOverlay } from "../components/HorrorOverlay";
 import { SaveDialog } from "../components/SaveDialog";
-import { saveGame, loadGame, hasSaveGame, applySaveData } from "../lib/saveSystem";
+import { StaminaBar } from "../components/StaminaBar";
+import {
+  saveGame,
+  loadGame,
+  hasSaveGame,
+  applySaveData,
+} from "../lib/saveSystem";
 import {
   CELL_SIZE,
   STARTING_COINS,
@@ -23,6 +29,7 @@ import {
   STARTING_PARSNIP_SEEDS,
   STARTING_POTATO_SEEDS,
   STARTING_WOOD,
+  MAX_STAMINA,
 } from "../lib/constants";
 
 export default function NightFarming() {
@@ -34,6 +41,9 @@ export default function NightFarming() {
       pixelY: 4 * CELL_SIZE,
       facing: "down",
       isMoving: false,
+      stamina: MAX_STAMINA,
+      maxStamina: MAX_STAMINA,
+      isResting: false,
     },
     camera: {
       x: 4 * CELL_SIZE,
@@ -94,15 +104,15 @@ export default function NightFarming() {
   const handleSave = useCallback(() => {
     // Save the current state (saveGame increments the day internally)
     saveGame(gameState);
-    
-    // Reset time, increment day, and move player away from bed
+
+    // Reset time, increment day, restore stamina, and move player away from bed
     setGameState(prev => {
       const prevDay = prev.gameTime?.day || 1;
       const newDay = prevDay + 1;
-      
+
       // Move player down one tile from bed to avoid retriggering save
       const newPlayerY = prev.player.y + 1;
-      
+
       return {
         ...prev,
         gameTime: {
@@ -115,6 +125,7 @@ export default function NightFarming() {
           ...prev.player,
           y: newPlayerY,
           pixelY: newPlayerY * CELL_SIZE,
+          stamina: prev.player.maxStamina, // Restore stamina to full when sleeping
         },
         camera: {
           ...prev.camera,
@@ -129,7 +140,7 @@ export default function NightFarming() {
     setGameState(prev => {
       // Move player down one tile from bed to avoid retriggering save
       const newPlayerY = prev.player.y + 1;
-      
+
       return {
         ...prev,
         player: {
@@ -212,7 +223,13 @@ export default function NightFarming() {
       />
 
       <HorrorOverlay horrorEvent={gameState.horrorEvent} />
-      
+
+      <StaminaBar
+        stamina={gameState.player.stamina}
+        maxStamina={gameState.player.maxStamina}
+        isResting={false}
+      />
+
       <SaveDialog
         gameState={gameState}
         onSave={handleSave}

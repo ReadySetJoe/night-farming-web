@@ -24,8 +24,12 @@ export const checkCollision = (
   const gridX = Math.round(pixelX / CELL_SIZE);
   const gridY = Math.round(pixelY / CELL_SIZE);
 
+  // Use actual world dimensions instead of hardcoded constants
+  const currentWorldHeight = world.length;
+  const currentWorldWidth = world[0]?.length || 0;
+
   // Check bounds
-  if (gridX < 0 || gridY < 0 || gridX >= WORLD_WIDTH || gridY >= WORLD_HEIGHT) {
+  if (gridX < 0 || gridY < 0 || gridX >= currentWorldWidth || gridY >= currentWorldHeight) {
     return true; // Out of bounds is solid
   }
 

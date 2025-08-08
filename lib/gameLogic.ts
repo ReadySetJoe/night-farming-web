@@ -22,6 +22,7 @@ import {
   ITEM_MAGNET_SPEED,
   ITEM_PICKUP_DELAY,
   CROP_PICKUP_DELAY,
+  STAMINA_COSTS,
 } from "./constants";
 import {
   createHouseInterior,
@@ -368,6 +369,11 @@ export const handleAction = (prevState: GameState): GameState => {
 
   // Handle axe on trees (can happen anywhere in exterior)
   if (selectedTool === "axe" && targetCell === "tree" && currentScene === "exterior") {
+    // Check stamina
+    if (prevState.player.stamina < STAMINA_COSTS.CHOP) {
+      return prevState; // Not enough stamina
+    }
+    
     const treeKey = `${targetX},${targetY}`;
     const currentTreeHealth = prevState.treeHealth.get(treeKey) || { health: TREE_MAX_HEALTH, maxHealth: TREE_MAX_HEALTH };
     
@@ -395,11 +401,27 @@ export const handleAction = (prevState: GameState): GameState => {
         });
       }
       
-      return { ...prevState, world: newWorld, treeHealth: newTreeHealth, droppedItems: newDrops };
+      return { 
+        ...prevState, 
+        world: newWorld, 
+        treeHealth: newTreeHealth, 
+        droppedItems: newDrops,
+        player: {
+          ...prevState.player,
+          stamina: Math.max(0, prevState.player.stamina - STAMINA_COSTS.CHOP),
+        },
+      };
     } else {
       // Tree takes damage but remains
       newTreeHealth.set(treeKey, { health: updatedHealth, maxHealth: TREE_MAX_HEALTH });
-      return { ...prevState, treeHealth: newTreeHealth };
+      return { 
+        ...prevState, 
+        treeHealth: newTreeHealth,
+        player: {
+          ...prevState.player,
+          stamina: Math.max(0, prevState.player.stamina - STAMINA_COSTS.CHOP),
+        },
+      };
     }
   }
 
@@ -412,10 +434,17 @@ export const handleAction = (prevState: GameState): GameState => {
   if (!isOnFarm) return prevState; // Can't farm outside the farm area
 
   const currentCell = newWorld[targetY][targetX];
+  let staminaCost = 0;
 
   switch (selectedTool) {
     case "hoe":
       if (!currentCell) {
+        // Check stamina
+        if (prevState.player.stamina < STAMINA_COSTS.HOE) {
+          return prevState;
+        }
+        staminaCost = STAMINA_COSTS.HOE;
+        
         newWorld[targetY][targetX] = {
           type: "tilled",
           stage: 0,
@@ -437,6 +466,12 @@ export const handleAction = (prevState: GameState): GameState => {
         currentCell.type === "tilled" &&
         inventory.seeds[seedType] > 0
       ) {
+        // Check stamina
+        if (prevState.player.stamina < STAMINA_COSTS.PLANT) {
+          return prevState;
+        }
+        staminaCost = STAMINA_COSTS.PLANT;
+        
         const seedConfig = getSeedConfig(seedType);
         newWorld[targetY][targetX] = {
           type: seedType,
@@ -461,6 +496,12 @@ export const handleAction = (prevState: GameState): GameState => {
         currentCell.type !== "tilled" &&
         currentCell.wateringsReceived < currentCell.wateringsRequired
       ) {
+        // Check stamina
+        if (prevState.player.stamina < STAMINA_COSTS.WATER) {
+          return prevState;
+        }
+        staminaCost = STAMINA_COSTS.WATER;
+        
         const newWaterings = currentCell.wateringsReceived + 1;
         newWorld[targetY][targetX] = {
           ...currentCell,
@@ -477,6 +518,12 @@ export const handleAction = (prevState: GameState): GameState => {
         currentCell.type !== "tilled" &&
         currentCell.stage === currentCell.maxStage
       ) {
+        // Check stamina
+        if (prevState.player.stamina < STAMINA_COSTS.HARVEST) {
+          return prevState;
+        }
+        staminaCost = STAMINA_COSTS.HARVEST;
+        
         const cropType = currentCell.type as SeedType;
         
         // Clear the tile
@@ -494,9 +541,31 @@ export const handleAction = (prevState: GameState): GameState => {
           createdAt: Date.now(),
         });
         
-        return { ...prevState, world: newWorld, inventory: newInventory, droppedItems: newDrops };
+        return { 
+          ...prevState, 
+          world: newWorld, 
+          inventory: newInventory, 
+          droppedItems: newDrops,
+          player: {
+            ...prevState.player,
+            stamina: Math.max(0, prevState.player.stamina - staminaCost),
+          },
+        };
       }
       break;
+  }
+
+  // Apply stamina cost if action was performed
+  if (staminaCost > 0) {
+    return { 
+      ...prevState, 
+      world: newWorld, 
+      inventory: newInventory,
+      player: {
+        ...prevState.player,
+        stamina: Math.max(0, prevState.player.stamina - staminaCost),
+      },
+    };
   }
 
   return { ...prevState, world: newWorld, inventory: newInventory };
@@ -540,6 +609,8 @@ export const getCellDisplay = (cell: TerrainType): string => {
         return "🌆";
       case "exit_to_farm":
         return "🚜";
+      case "exit_to_arena":
+        return "⚔️";
       case "fence":
         return "🔸";
       case "stone_wall":
