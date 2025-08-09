@@ -2,7 +2,80 @@
 
 ## Project Overview
 
-Night Farming is a browser-based farming simulation game inspired by Stardew Valley, built with Next.js, React, TypeScript, and Tailwind CSS. The game features a top-down farming experience with smooth movement, collision detection, stamina management, physics-based item collection, save system, and multiple connected scenes including a dedicated combat arena. The architecture is designed for gradual introduction of horror elements.
+Night Farming is a browser-based **horror farming simulation** game inspired by Stardew Valley, built with Next.js, React, TypeScript, and Tailwind CSS. The game features a top-down farming experience with smooth movement, collision detection, stamina management, physics-based item collection, save system, **progressive horror elements**, **dynamic day/night cycle**, **corrupted crops**, **multiple enemy types**, **atmospheric music system**, and multiple connected scenes including a dedicated combat arena.
+
+**🌙 KEY HORROR FEATURES:**
+- **Progressive Horror Levels** (0-10) based on days survived
+- **Corrupted Crop System** with visual decay progression  
+- **Day/Night Cycle** with atmospheric darkness overlay
+- **Dynamic Enemy Spawning** (Bats at night, Skeletons in nightmare mode)
+- **Horror Events** (Whispers, Shadow Figures, Blood Moon)
+- **Scene-Based Dynamic Music** with horror overlays
+
+## Current System Status ✅
+
+### 🌙 **HORROR PROGRESSION SYSTEM** (NEW!)
+- **Dynamic Horror Levels**: 0-10 progression based on days survived
+- **Threshold System**: 
+  - Day 3: Whispers begin during night hours
+  - Day 5: Crop corruption starts affecting farmland
+  - Day 8: Shadow figures appear in peripheral vision
+  - Day 12: Blood moon events create extended horror periods
+  - Day 15: Full nightmare mode with enhanced enemy spawning
+- **Horror State Tracking**: Corruption spread, recent events, nightmare mode flags
+- **Time-Based Events**: Horror events only trigger during appropriate time ranges
+
+### 🖤 **CORRUPTED CROP SYSTEM** (NEW!)
+- **Visual Progression**: Normal crops → 🟫 → 🖤 → 💀 → 👹 (4 corruption stages)
+- **Progressive Corruption**: Crops corrupt based on horror level and age
+- **Corruption Spread**: Higher horror levels increase corruption probability
+- **Visual Integration**: Corrupted crops display unique emojis instead of normal growth stages
+- **Growth Blocking**: Corrupted crops cannot grow normally, requiring replacement
+
+### 🌅 **DAY/NIGHT CYCLE SYSTEM** (NEW!)
+- **24-Hour Time Progression**: 6 AM (dawn) → 6 PM (dusk) → 8 PM (night) → 5 AM (pre-dawn)
+- **Dynamic Lighting**: Night intensity overlay (0-1) with gradual transitions
+- **Visual Atmosphere**: 
+  - **Day**: Bright, clear visibility
+  - **Dusk/Dawn**: Gradual darkening/lightening transitions
+  - **Night**: Dark blue overlay with vignette effect
+  - **Horror Nights**: Purple/red tint during high horror levels
+  - **Blood Moon**: Dramatic red overlay during special events
+- **Time-Based Mechanics**: Horror events, enemy spawning, and music changes
+
+### 👾 **ADVANCED ENEMY SYSTEM** (NEW!)
+- **Multiple Enemy Types**:
+  - **🟢 Slimes**: Balanced enemies, spawn anytime (30 HP, moderate speed)
+  - **🦇 Bats**: Fast, erratic night enemies (15 HP, high speed, unpredictable AI)
+  - **💀 Skeletons**: Nightmare-mode tanks (60 HP, slow, relentless pursuit)
+- **AI Behavior Systems**:
+  - **Slimes**: Standard chase/wander with randomization
+  - **Bats**: Erratic flight patterns, frequent direction changes
+  - **Skeletons**: Methodical, straight-line pursuit without randomness
+- **Dynamic Spawning**: Enemy count and types based on horror level and time
+- **Weighted Selection**: Spawn probability based on enemy rarity and conditions
+
+### 🎵 **DYNAMIC MUSIC SYSTEM** (NEW!)
+- **Scene-Based Tracks**:
+  - **Farm Day**: Peaceful acoustic farming music
+  - **Farm Night**: Quiet ambient nighttime sounds
+  - **Town**: Village life background atmosphere
+  - **Arena**: Intense combat music
+  - **House**: Cozy interior ambience
+- **Horror Overlay System**:
+  - **Horror Whispers**: Spooky whispers during night events
+  - **Horror Ambience**: Dark atmospheric drones at high horror levels
+  - **Blood Moon**: Ominous music during special events
+- **Smart Transitions**: Cross-fade between tracks, layered horror overlays
+- **Audio Management**: Volume control, mute toggle, localStorage persistence
+- **Browser Compatibility**: Handles autoplay restrictions with user interaction
+
+### ⚔️ **ENHANCED COMBAT SYSTEM** (UPDATED)
+- **Smooth Sword Combat**: 300ms swing animations with directional targeting
+- **Advanced Knockback**: Physics-based knockback with velocity and friction
+- **Health System**: 100 HP with visual health bar and invincibility frames
+- **Enemy-Specific Damage**: Different enemy types deal varying damage amounts
+- **Death Recovery**: 0 HP teleports to bed, advances day, restores health/stamina
 
 ## Current System Status ✅
 

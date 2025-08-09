@@ -3,9 +3,10 @@ import { GameState, KeyState } from "../lib/types";
 import { checkCollision, isSolid } from "../lib/collision";
 import { createWorld, createTownSquare, createArena, createHouseInterior } from "../lib/world";
 import { getNPCFacing } from "../lib/npcs";
-import { isHorrorEventActive } from "../lib/horror";
+import { isHorrorEventActive, updateHorrorState, getRandomHorrorEvent } from "../lib/horror";
 import { updateDroppedItems } from "../lib/gameLogic";
-import { updateEnemyAI, checkEntityCollision, createEnemy } from "../lib/enemies";
+import { shouldCorruptCrop, corruptCrop, progressCorruption } from "../lib/seeds";
+import { updateEnemyAI, checkEntityCollision, createEnemy, getEligibleEnemyTypes, getRandomEnemyType } from "../lib/enemies";
 import {
   WORLD_WIDTH,
   WORLD_HEIGHT,
@@ -184,13 +185,30 @@ export const useGameLoop = (
           const arenaEnemies = prev.enemies.filter(enemy => enemy.scene === "arena");
           let enemies = [...prev.enemies];
           
-          // Only spawn if no arena enemies exist AND we don't already have the arena_slime
-          if (arenaEnemies.length === 0 && !prev.enemies.find(e => e.id === "arena_slime")) {
-            // Create a slime enemy in the center of the arena
-            const centerX = Math.floor(arenaWorld[0].length / 2);
-            const centerY = Math.floor(arenaWorld.length / 2);
-            const slime = createEnemy("arena_slime", "slime", centerX, centerY, "arena");
-            enemies.push(slime);
+          // Spawn enemies based on time and horror level
+          const maxEnemies = Math.min(1 + Math.floor(prev.horrorState.currentLevel / 3), 4); // 1-4 enemies max
+          
+          if (arenaEnemies.length < maxEnemies) {
+            const eligibleTypes = getEligibleEnemyTypes(prev.gameTime.isNight, prev.horrorState.nightmareMode);
+            if (eligibleTypes.length > 0) {
+              const enemyType = getRandomEnemyType(eligibleTypes);
+              
+              // Spawn at random position around the edges
+              const margin = 2;
+              const isVertical = Math.random() < 0.5;
+              let spawnX, spawnY;
+              
+              if (isVertical) {
+                spawnX = Math.random() < 0.5 ? margin : arenaWorld[0].length - margin - 1;
+                spawnY = margin + Math.floor(Math.random() * (arenaWorld.length - margin * 2));
+              } else {
+                spawnX = margin + Math.floor(Math.random() * (arenaWorld[0].length - margin * 2));
+                spawnY = Math.random() < 0.5 ? margin : arenaWorld.length - margin - 1;
+              }
+              
+              const enemy = createEnemy(`arena_${enemyType}_${Date.now()}`, enemyType, spawnX, spawnY, "arena");
+              enemies.push(enemy);
+            }
           }
 
           return {
@@ -320,6 +338,8 @@ export const useGameLoop = (
                   minutes: 0,
                   totalMinutes: 6 * 60,
                   day: newDay,
+                  isNight: false, // 6 AM is day time
+                  nightIntensity: 0, // No darkness at 6 AM
                 },
                 player: {
                   ...updatedState.player,
@@ -370,31 +390,44 @@ export const useGameLoop = (
     return () => clearInterval(intervalId);
   }, [keys, setGameState]);
 
-  // Crop growth loop
+  // Crop growth and corruption loop
   useEffect(() => {
     const growthInterval = setInterval(() => {
       setGameState(prev => {
         const newWorld = prev.world.map(row =>
           row.map(cell => {
-            if (
-              cell &&
-              typeof cell === "object" &&
-              cell.type !== "tilled" &&
-              cell.wateringsReceived >= cell.wateringsRequired &&
-              cell.stage < cell.maxStage
-            ) {
-              const timeSincePlanted = Date.now() - cell.plantedAt;
-              const shouldGrow =
-                timeSincePlanted > (cell.stage + 1) * CROP_GROWTH_INTERVAL;
+            if (cell && typeof cell === "object" && cell.type !== "tilled") {
+              let updatedCell = { ...cell };
+              
+              // Handle normal crop growth
+              if (
+                !cell.isCorrupted &&
+                cell.wateringsReceived >= cell.wateringsRequired &&
+                cell.stage < cell.maxStage
+              ) {
+                const timeSincePlanted = Date.now() - cell.plantedAt;
+                const shouldGrow =
+                  timeSincePlanted > (cell.stage + 1) * CROP_GROWTH_INTERVAL;
 
-              if (shouldGrow) {
-                return {
-                  ...cell,
-                  stage: cell.stage + 1,
-                  watered: false,
-                  wateringsReceived: 0, // Reset waterings for next stage
-                };
+                if (shouldGrow) {
+                  updatedCell = {
+                    ...updatedCell,
+                    stage: updatedCell.stage + 1,
+                    watered: false,
+                    wateringsReceived: 0, // Reset waterings for next stage
+                  };
+                }
               }
+              
+              // Handle corruption spread
+              if (shouldCorruptCrop(updatedCell, prev.horrorState.currentLevel, prev.horrorState.corruptionSpread)) {
+                updatedCell = corruptCrop(updatedCell);
+              } else if (updatedCell.isCorrupted && Math.random() < 0.1) {
+                // Progress existing corruption slowly (10% chance per tick)
+                updatedCell = progressCorruption(updatedCell);
+              }
+              
+              return updatedCell;
             }
             return cell;
           })
@@ -513,23 +546,37 @@ export const useGameLoop = (
     return () => clearInterval(npcMovementInterval);
   }, [setGameState]);
 
-  // Horror event management
+  // Horror event management and progression
   useEffect(() => {
     const horrorInterval = setInterval(() => {
       setGameState(prev => {
-        if (!prev.horrorEvent) return prev;
+        let updatedState = { ...prev };
 
-        // Check if horror event should end
-        if (!isHorrorEventActive(prev.horrorEvent)) {
-          return {
-            ...prev,
-            horrorEvent: null,
+        // Update horror progression based on current day
+        updatedState.horrorState = updateHorrorState(updatedState);
+
+        // Check if current horror event should end
+        if (updatedState.horrorEvent && !isHorrorEventActive(updatedState.horrorEvent)) {
+          // Add to recent events to prevent immediate re-trigger
+          const eventType = updatedState.horrorEvent.type;
+          updatedState.horrorState = {
+            ...updatedState.horrorState,
+            recentEvents: [...updatedState.horrorState.recentEvents.slice(-4), eventType], // Keep last 5 events
           };
+          updatedState.horrorEvent = null;
         }
 
-        return prev;
+        // Try to trigger new horror event (every 10 seconds, with random chance)
+        if (!updatedState.horrorEvent && Math.random() < 0.1) {
+          const newEvent = getRandomHorrorEvent(updatedState);
+          if (newEvent) {
+            updatedState.horrorEvent = newEvent;
+          }
+        }
+
+        return updatedState;
       });
-    }, 100);
+    }, 1000); // Check every second for horror events
 
     return () => clearInterval(horrorInterval);
   }, [setGameState]);

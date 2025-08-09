@@ -110,6 +110,8 @@ export const applySaveData = (
       minutes: STARTING_MINUTE,
       totalMinutes: STARTING_HOUR * 60 + STARTING_MINUTE,
       day: saveData.gameTime?.day || 1, // Default to 1 if day is missing
+      isNight: false, // 6 AM is day time
+      nightIntensity: 0, // No darkness at 6 AM
     },
     player: {
       ...currentState.player,

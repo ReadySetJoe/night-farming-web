@@ -9,20 +9,26 @@ export const ENEMY_CONFIGS = {
     speed: 1.0, // pixels per frame
     damage: 8,
     name: "Slime",
+    preferredTime: "any", // Active any time
+    spawnWeight: 3, // Common enemy
   },
   bat: {
     emoji: "🦇", 
-    health: 20,
-    speed: 1.8,
+    health: 15,
+    speed: 2.2, // Fast and erratic
     damage: 6,
     name: "Bat",
+    preferredTime: "night", // Only spawns at night
+    spawnWeight: 2, // Less common
   },
   skeleton: {
     emoji: "💀",
-    health: 50,
-    speed: 0.8,
-    damage: 15,
+    health: 60,
+    speed: 0.6, // Slow but tanky
+    damage: 18,
     name: "Skeleton",
+    preferredTime: "nightmare", // Only in nightmare mode
+    spawnWeight: 1, // Rare enemy
   },
 } as const;
 
@@ -174,25 +180,61 @@ export const updateEnemyAI = (
     updatedEnemy.behaviorTimer = 0;
   }
   
-  // Execute behavior
+  // Execute behavior (different for each enemy type)
   switch (updatedEnemy.currentBehavior) {
     case "chase":
-      // Move toward player with some unpredictability
+      if (updatedEnemy.type === "bat") {
+        // Bats: Fast, erratic flight patterns
+        const chaseDirection = getDirection(
+          enemy.pixelX, enemy.pixelY,
+          playerPixelX, playerPixelY
+        );
+        
+        // Much more erratic movement for bats
+        const randomOffset = 0.8;
+        const randomX = (Math.random() - 0.5) * randomOffset;
+        const randomY = (Math.random() - 0.5) * randomOffset;
+        
+        updatedEnemy.pixelX += (chaseDirection.x + randomX) * enemy.speed;
+        updatedEnemy.pixelY += (chaseDirection.y + randomY) * enemy.speed;
+        
+        // Bats change direction frequently
+        if (Math.random() < 0.3) {
+          updatedEnemy.currentBehavior = "wander";
+          updatedEnemy.behaviorTimer = 0;
+        }
+      } else if (updatedEnemy.type === "skeleton") {
+        // Skeletons: Slow but relentless, straight-line pursuit
+        const chaseDirection = getDirection(
+          enemy.pixelX, enemy.pixelY,
+          playerPixelX, playerPixelY
+        );
+        
+        // No randomness - skeletons are methodical
+        updatedEnemy.pixelX += chaseDirection.x * enemy.speed;
+        updatedEnemy.pixelY += chaseDirection.y * enemy.speed;
+      } else {
+        // Slimes: Normal chase behavior
+        const chaseDirection = getDirection(
+          enemy.pixelX, enemy.pixelY,
+          playerPixelX, playerPixelY
+        );
+        
+        const randomOffset = 0.3;
+        const randomX = (Math.random() - 0.5) * randomOffset;
+        const randomY = (Math.random() - 0.5) * randomOffset;
+        
+        updatedEnemy.pixelX += (chaseDirection.x + randomX) * enemy.speed;
+        updatedEnemy.pixelY += (chaseDirection.y + randomY) * enemy.speed;
+      }
+      
+      updatedEnemy.isMoving = true;
+      
+      // Update facing direction
       const chaseDirection = getDirection(
         enemy.pixelX, enemy.pixelY,
         playerPixelX, playerPixelY
       );
-      
-      // Add some randomness to make movement unpredictable
-      const randomOffset = 0.3;
-      const randomX = (Math.random() - 0.5) * randomOffset;
-      const randomY = (Math.random() - 0.5) * randomOffset;
-      
-      updatedEnemy.pixelX += (chaseDirection.x + randomX) * enemy.speed;
-      updatedEnemy.pixelY += (chaseDirection.y + randomY) * enemy.speed;
-      updatedEnemy.isMoving = true;
-      
-      // Update facing direction
       if (Math.abs(chaseDirection.x) > Math.abs(chaseDirection.y)) {
         updatedEnemy.facing = chaseDirection.x > 0 ? "right" : "left";
       } else {
@@ -324,4 +366,38 @@ export const applySwordAttack = (
     
     return enemy;
   });
+};
+
+// Get eligible enemy types for spawning based on conditions
+export const getEligibleEnemyTypes = (isNight: boolean, isNightmare: boolean): Array<keyof typeof ENEMY_CONFIGS> => {
+  const eligibleTypes: Array<keyof typeof ENEMY_CONFIGS> = [];
+  
+  Object.keys(ENEMY_CONFIGS).forEach(enemyType => {
+    const config = ENEMY_CONFIGS[enemyType as keyof typeof ENEMY_CONFIGS];
+    
+    if (config.preferredTime === "any") {
+      eligibleTypes.push(enemyType as keyof typeof ENEMY_CONFIGS);
+    } else if (config.preferredTime === "night" && isNight) {
+      eligibleTypes.push(enemyType as keyof typeof ENEMY_CONFIGS);
+    } else if (config.preferredTime === "nightmare" && isNightmare) {
+      eligibleTypes.push(enemyType as keyof typeof ENEMY_CONFIGS);
+    }
+  });
+  
+  return eligibleTypes;
+};
+
+// Get random enemy type with weighted selection
+export const getRandomEnemyType = (eligibleTypes: Array<keyof typeof ENEMY_CONFIGS>): keyof typeof ENEMY_CONFIGS => {
+  const weightedTypes: Array<keyof typeof ENEMY_CONFIGS> = [];
+  
+  eligibleTypes.forEach(enemyType => {
+    const config = ENEMY_CONFIGS[enemyType];
+    // Add multiple copies based on spawn weight
+    for (let i = 0; i < config.spawnWeight; i++) {
+      weightedTypes.push(enemyType);
+    }
+  });
+  
+  return weightedTypes[Math.floor(Math.random() * weightedTypes.length)] || "slime";
 };

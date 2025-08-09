@@ -16,6 +16,8 @@ import { HorrorOverlay } from "../components/HorrorOverlay";
 import { SaveDialog } from "../components/SaveDialog";
 import { StaminaBar } from "../components/StaminaBar";
 import { HealthBar } from "../components/HealthBar";
+import { NightOverlay } from "../components/NightOverlay";
+import { useMusic } from "../hooks/useMusic";
 import {
   saveGame,
   loadGame,
@@ -77,10 +79,19 @@ export default function NightFarming() {
       minutes: STARTING_MINUTE,
       totalMinutes: STARTING_HOUR * 60 + STARTING_MINUTE,
       day: 1,
+      isNight: false, // 6 AM is day time
+      nightIntensity: 0, // No darkness at 6 AM
     },
     npcs: [createMaryNPC()],
     activeDialogue: null,
     horrorEvent: null,
+    horrorState: {
+      currentLevel: 0,
+      totalDays: 1,
+      recentEvents: [],
+      corruptionSpread: 0,
+      nightmareMode: false,
+    },
     droppedItems: [],
     treeHealth: new Map(),
     savePrompt: null,
@@ -100,6 +111,9 @@ export default function NightFarming() {
   });
 
   const [debugMode, setDebugMode] = useState(false);
+
+  // Music system (auto-plays at 50% volume)
+  useMusic(gameState);
 
   // Handlers
   const handleToolSelect = useCallback((tool: ToolType) => {
@@ -129,6 +143,8 @@ export default function NightFarming() {
           minutes: STARTING_MINUTE,
           totalMinutes: STARTING_HOUR * 60 + STARTING_MINUTE,
           day: newDay,
+          isNight: false, // 6 AM is day time
+          nightIntensity: 0, // No darkness at 6 AM
         },
         player: {
           ...prev.player,
@@ -250,6 +266,8 @@ export default function NightFarming() {
         onSave={handleSave}
         onCancel={handleCancelSave}
       />
+
+      <NightOverlay gameState={gameState} />
     </div>
   );
 }

@@ -9,6 +9,8 @@ export interface Crop {
   plantedAt: number;
   wateringsReceived: number;
   wateringsRequired: number;
+  isCorrupted?: boolean;
+  corruptionLevel?: number; // 0-3, affects appearance and behavior
 }
 
 export interface Player {
@@ -77,11 +79,25 @@ export interface NPC {
 
 export interface HorrorEvent {
   id: string;
-  type: "forge_nightmare";
+  type: "forge_nightmare" | "corrupted_crop" | "whispers" | "shadow_figure" | "blood_moon" | "cursed_harvest";
   isActive: boolean;
   startTime: number;
   duration: number;
   intensity: number;
+  triggerConditions?: {
+    minDay?: number;
+    timeRange?: { start: number; end: number }; // Hours in 24h format
+    location?: string;
+    probability?: number;
+  };
+}
+
+export interface HorrorState {
+  currentLevel: number; // 0-10 horror progression
+  totalDays: number;
+  recentEvents: string[];
+  corruptionSpread: number; // 0-1, affects crop corruption chance
+  nightmareMode: boolean; // Unlocked at high horror levels
 }
 
 export interface GameState {
@@ -103,6 +119,8 @@ export interface GameState {
     minutes: number;
     totalMinutes: number;
     day: number;
+    isNight: boolean;
+    nightIntensity: number; // 0-1, how dark it is
   };
   npcs: NPC[];
   enemies: Enemy[];
@@ -112,6 +130,7 @@ export interface GameState {
     isActive: boolean;
   } | null;
   horrorEvent: HorrorEvent | null;
+  horrorState: HorrorState;
   droppedItems: DroppedItem[];
   treeHealth: Map<string, TreeData>;
   savePrompt: {
